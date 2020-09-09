@@ -1,6 +1,6 @@
 # Zohar Files Scrapping Tool
 
-## User guide
+## User Guide
 
 ### Installation 
 
