@@ -38,7 +38,7 @@ to clear text files using the following rules:
   * Creates html file for every input file containing chunking summary.
   
 #### zohar_process_root.py
-  This script runs zohar_download_article.py and then zohar_preprocess_article.py on all links contained in the article tree on kabbalahmedia.info website
+  This script runs zohar_download_article.py and then zohar_preprocess_article.py on all links contained in the article tree on kabbalahmedia.info website.
 
 ### Regexes
   Language related regexes are located in a file `regexes_{lang}.py` file where `{lang}` can be either `he` or `en`. Every language regex file must define the following constants:
@@ -53,5 +53,5 @@ to clear text files using the following rules:
     <dt>REPLACE</dt>
     <dd>Replacement regexes (pairs of items: regex pattern and a replacement string)
     <dt>HIGHLIGHT</dt>
-    <dd>Hightlighted text regexes (the highlighted text is added to the comments in html)
+    <dd>Hightlighted text regexes (the highlighted text is added to the comments in the summary html)
    </dl>
