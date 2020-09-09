@@ -49,7 +49,7 @@ to clear text files using the following rules:
     <dt>SENTENCES_SPLIT</dt>
     <dd>List of regexes that split the sentences (used when chunk='sentences').</dd>
     <dt>SENTENCES_KEEP</dt>
-    <dd>List of regexes that prevent the sentence of being split  (used when chunk='sentences', has precedence over SENTENCES_SPLIT).</dd>
+    <dd>List of regexes that prevent the sentence from being split  (used when chunk='sentences', has precedence over SENTENCES_SPLIT).</dd>
     <dt>REPLACE</dt>
     <dd>Replacement regexes (pairs of items: regex pattern and a replacement string)
     <dt>HIGHLIGHT</dt>
