@@ -53,5 +53,5 @@ to clear text files using the following rules:
     <dt>REPLACE</dt>
     <dd>Replacement regexes (pairs of items: regex pattern and a replacement string)
     <dt>HIGHLIGHT</dt>
-    <dd>Hightlighted text regexes (the highlighted text is added to the comments in the summary html)
+    <dd>Hightlighted text regexes (the highlighted text can be optionally added to the comments in the summary html)
    </dl>
