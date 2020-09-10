@@ -19,6 +19,11 @@ The scrapping tool contains three major scripts:
   * zohar_split_heuristic.py
   * zohar_create_summary.py
   * zohar_process_root.py
+  
+To check the exact paramters of every script run:
+```shell
+python3 {script_name} --help
+```
 
 #### zohar_download_article.py
 
