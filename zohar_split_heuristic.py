@@ -1,18 +1,15 @@
 import argparse
-import regexes_en
-import regexes_he
+import regexes
 import math
 import re
 
 import sys
 
-REGEXES = {'he': regexes_he, 'en': regexes_en}
-
 def keep_digit(s):
     return int(re.sub('[^0-9]', '', s))
 
 def split_by_letters(contents, lang):
-    item = REGEXES[lang].ITEM
+    item = regexes.REGEXES[lang].ITEM
 
     parts = re.split(f'({item})', contents, flags=re.MULTILINE)
     keys = [keep_digit(key) for key in parts[1::2]]
@@ -34,18 +31,18 @@ def split_letters(eng, heb, max_en_words):
 
     for letter, en, he in letters:
         if not en and he:
-            output_he.append((f'.{letter}', [he]))
+            output_he.append((f'.{letter}', he))
             continue
         if not he and en:
-            output_en.append((f'{letter})', [en]))
+            output_en.append((f'{letter})', en))
             continue
         if not he and not he:
             continue
 
         n_en = len(en.split())
         if n_en <= max_en_words:
-            output_he.append((f'{letter}', [en]))
-            output_en.append((f'.{letter})', [he]))
+            output_he.append((f'.{letter}', he))
+            output_en.append((f'{letter})', en))
             continue
 
         n_chunks = math.ceil(n_en / max_en_words)

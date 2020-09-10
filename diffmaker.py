@@ -1,30 +1,7 @@
+from zohar_split_heuristic import letters_chunks
 import argparse
-import regexes_en
-import regexes_he
-import re
-
 import sys
 
-REGEXES = {'he': regexes_he, 'en': regexes_en}
-
-def keep_digit(s):
-    return int(re.sub('[^0-9]', '', s))
-
-def split_by_letters(contents, lang):
-    item = REGEXES[lang].ITEM
-
-    parts = re.split(f'({item})', contents, flags=re.MULTILINE)
-    keys = [keep_digit(key) for key in parts[1::2]]
-    values = parts[2::2]
-    assert len(keys) == len(values)
-    return zip(keys, values)
-
-def letters_chunks(eng, heb):
-    en = dict(split_by_letters(eng, 'en'))
-    he = dict(split_by_letters(heb, 'he'))
-
-    letters = list(sorted(set(en.keys()) | set(he.keys())))
-    return [(letter, en.get(letter), he.get(letter)) for letter in letters]
 
 def diff(eng, heb, sep):
     letters = letters_chunks(eng, heb)

@@ -5,10 +5,7 @@ import re
 import argparse
 from datetime import datetime
 
-import regexes_en
-import regexes_he
-
-REGEXES = {'he': regexes_he, 'en': regexes_en}
+from regexes import REGEXES
 
 class Options:
     "file processing options for one file"
