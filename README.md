@@ -16,7 +16,8 @@ pip3 install -r requirements.txt
 The scrapping tool contains three major scripts:
   * zohar_download_article.py
   * zohar_preprocess_file.py
-  * zohar_split_letters.py
+  * zohar_split_heuristic.py
+  * zohar_create_summary.py
   * zohar_process_root.py
 
 #### zohar_download_article.py
@@ -37,15 +38,17 @@ to clear text files using the following rules:
   * When chunk option is 'joined' all paragraphs in the same Ot are joined.
   * After the initial clear text content is created it is altered using regular expressions describing language specific replace directives.
     These regular expressions are also defined in regex_{lang}.py.
-  * A heuristic for optimizing text entries located in zohar_split_letters.py can be optioanaly executed at this stage.
-  * Creates html file for every input file containing chunking summary.
   
-### zohar_split_letters.py
+### zohar_split_heuristic.py
 
-This script gets english and hebrew text files and the maximum number of words per english text entry and outputs new pair of files where for every Ot is split so that the length of its texts sections will not diverge too much from the requested number of words. 
+This script gets english and hebrew text files and the maximum number of words per english text entry and outputs new pair of files (or overrides existsing files). Every Ot in the output is split so that the length of every chunk inside does not diverge too much from the requested number of words.
+
+### zohar_create_summary.py
+
+This script gets english and hebrew text files and creates html file for every letter in the input containing chunking summary. 
   
 #### zohar_process_root.py
-  This script runs zohar_download_article.py and then zohar_preprocess_article.py on all links contained in the article tree on kabbalahmedia.info website.
+  This script runs zohar_download_article.py, zohar_preprocess_article.py, zohar_split_heuristic.py and zohar_create_summary.py on all links contained in the article tree on kabbalahmedia.info website.
 
 ### Regexes
   Language related regexes are located in a file `regexes_{lang}.py` file where `{lang}` can be either `he` or `en`. Every language regex file must define the following constants:
