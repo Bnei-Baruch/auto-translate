@@ -115,14 +115,24 @@ def download(_id, dest=''):
     folder = assets[0].formatted_title(_id)
     base = os.path.join(dest, folder)
     os.makedirs(base, exist_ok=True)
+
+    paths = []
+    title = ''
     
     for asset in assets:
         path = os.path.join(base, asset.lang) + '.' + FORMAT
+        paths.append((asset.lang, path))
+
+        if asset.lang == 'en':
+            title = asset.title
+
         if file_size(path) == len(asset.content):
             continue
 
         with open(path, 'wb') as f:
             f.write(asset.content)
+
+    return paths, title, base
 
 def main():
     parser = argparse.ArgumentParser()

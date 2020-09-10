@@ -47,14 +47,19 @@ def webpage(rows, min_ratio, max_ratio, timestamp, title, output):
     print('<dt>Maximum Ratio</dt>', '<dd>', max_ratio, '</dd>', sep='', file=output)
     print('</dl>', file=output)
 
-    print('<table cellspacing="0" border="1">', file=output)
+    print('<table cellspacing="0" border="1" width="100%">', file=output)
     print('<tr><th>Item</th><th>HE #Chunks</th><th>EN #Chunks</th><th>Valid?</th><th>Comments</th>', file=output)
 
     for letter, n_en, n_he, valid, comments in rows:
-        print(f'<tr><td>{letter}</td><td>{n_he}</td><td>{n_en}</td><td>{valid}</td><td>{comments}</td></tr>')
+        print(f'<tr><td>{letter}</td><td>{n_he}</td><td>{n_en}</td><td>{valid}</td><td>{comments}</td></tr>', file=output)
 
-    print('</table></body></html>')
+    print('</table></body></html>', file=output)
 
+def save_summary(eng, heb, sep, minr, maxr, title, ts, output):
+   with open(eng) as en, open(heb) as he:
+        rows = summary(en.read(), he.read(), sep, minr, maxr)
+
+   webpage(rows, minr, maxr, ts, title, output)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -67,10 +72,8 @@ def main():
     parser.add_argument("--timestamp", help="file creation timestamp", default='')
 
     args = parser.parse_args()
-
-    with open(args.english_file) as en, open(args.hebrew_file) as he:
-        rows = summary(en.read(), he.read(), args.sep, args.min_ratio, args.max_ratio)
-        html = webpage(rows, args.min_ratio, args.max_ratio, args.timestamp, args.title, sys.stdout)
+    save_summary(args.english_file, args.hebrew_file, args.sep, args.min_ratio,
+                 args.max_ratio, args.title, args.timestamp, sys.stdout)
 
 if __name__ == "__main__":
     main()

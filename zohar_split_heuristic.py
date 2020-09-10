@@ -24,7 +24,7 @@ def letters_chunks(eng, heb):
     letters = list(sorted(set(en.keys()) | set(he.keys())))
     return [(letter, en.get(letter), he.get(letter)) for letter in letters]
 
-def split_letters(eng, heb, max_en_words):
+def split_letters(eng, heb, max_en_words, atomic_line):
     letters = letters_chunks(eng, heb)
     output_en = []
     output_he = []
@@ -47,8 +47,8 @@ def split_letters(eng, heb, max_en_words):
 
         n_chunks = math.ceil(n_en / max_en_words)
 
-        en_parts = en.split('\n')
-        he_parts = he.split('\n')
+        en_parts = en.split('\n') if atomic_line else en.split()
+        he_parts = he.split('\n') if atomic_line else en.split()
 
         he_chunk = math.ceil(len(he_parts) / n_chunks)
         en_chunk = math.ceil(len(en_parts) / n_chunks)
@@ -61,11 +61,18 @@ def split_letters(eng, heb, max_en_words):
 
     return output_en, output_he
 
-def save_file(letters, path, postfix):
-    with open(path + postfix, 'w') as f:
+def save_file(letters, path):
+    with open(path, 'w') as f:
         for letter, content in letters:
             print(letter, end=' ', file=f)
             print(content, file=f)
+
+def split_and_save(eng, heb, en_words_threshold, atomic_line, en_out, he_out):
+    with open(eng) as en, open(heb) as he:
+        output_en, output_he = split_letters(en.read(), he.read(), en_words_threshold, atomic_line)
+
+    save_file(output_en, en_out)
+    save_file(output_he, he_out)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -74,13 +81,15 @@ def main():
     parser.add_argument("--output_postfix", help="postfix of the output file names", default='.split.txt')
     parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split", default=512)
 
+    parser.add_argument("--atomic_line", dest='atomic_line', action='store_true', help="make lines atomic (default)")
+    parser.add_argument("--no-atomic-line", dest='atomic_line', action='store_false', help="make words atomic")
+    parser.set_defaults(atomic_line=True)
+
     args = parser.parse_args()
-
-    with open(args.english_file) as en, open(args.hebrew_file) as he:
-        output_en, output_he = split_letters(en.read(), he.read(), args.en_words_threshold)
-
-    save_file(output_en, args.english_file, args.output_postfix)
-    save_file(output_he, args.hebrew_file, args.output_postfix)
+    he_output = args.hebrew_file + args.output_postfix
+    en_output = args.english_file + args.output_postfix
+    split_and_save(args.english_file, args.hebrew_file, args.en_words_threshold,
+                   args.atomic_line, en_output, he_output)
 
 if __name__ == "__main__":
     main()

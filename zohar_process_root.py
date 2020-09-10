@@ -3,8 +3,13 @@ import re
 import argparse
 import tqdm
 import sys
+import os
+from datetime import datetime
 
 from zohar_download_article import download, MissingLanguage
+from zohar_preprocess_file import process, Options
+from zohar_split_heuristic import split_and_save
+from zohar_create_summary import save_summary
 
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
@@ -17,14 +22,8 @@ def sources_list(base=SAMPLE_URL):
     
     return list({link[len('div id="title-'):-1] for link in links})
 
-def guarded_download(src_dest):
-    src, dest = src_dest
-    try:
-        download(src, dest)
-    except MissingLanguage:
-        pass
-    except Exception as e:
-        print('Failed downloading', src, file=sys.stderr)
+def utctime():
+    return datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,6 +31,19 @@ def main():
     parser.add_argument("--dest", default='zohar/', help="destination directory")
     parser.add_argument("--skip-process", dest='skip', action='store_true', help="skip processing (only download)")
     parser.add_argument("--no-skip-process", dest='skip', action='store_false', help="do not skip processing (default)")
+
+    parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
+    parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
+    parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
+
+    parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=512)
+    parser.add_argument("--split_extention", help="extension of split files", default='.split.txt')
+
+    parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
+    parser.add_argument("--max_ratio", help="maximum english/hebrew ratio", default=2.0)
+
+    parser.add_argument("--summary_name", help="html summary file name", default="summary.html")
+
     parser.set_defaults(skip=False)
 
     args = parser.parse_args()
@@ -39,7 +51,44 @@ def main():
 
     progress = tqdm.tqdm(range(len(sources)))
     for src, _ in zip(sources, progress):
-        guarded_download((src, args.dest))
+        try:
+            paths, title, base = download(src, args.dest)
+            if args.skip:
+                continue
+
+            lang_paths = dict(paths)
+            en_path = lang_paths['en']
+            he_path = lang_paths['he']
+
+            ts = utctime()
+            postfix = '.' + ts + '.txt'
+            opts = [Options(en_path, args.chunk, 'en', args.n_chars_en),
+                    Options(he_path, args.chunk, 'he', args.n_chars_he)]
+            process(opts, postfix)
+
+            en_split = en_path + '.' + ts + args.split_extention
+            he_split = he_path + '.' + ts
+            en_path += postfix
+            he_path += postfix
+
+            sep = '\n'
+            if args.en_words_threshold:
+                atomic_line = args.chunk != 'joined'
+                split_and_save(en_path, he_path, args.en_words_threshold, atomic_line, en_split, he_split)
+
+                en_path = en_split
+                he_path = he_split
+                sep = '\n\n'
+
+            summary = os.path.join(base, args.summary_name)
+            with open(summary, 'w') as f:
+                save_summary(en_path, he_path, sep, args.min_ratio, args.max_ratio, title, ts, f)
+
+        except MissingLanguage:
+            continue
+        except Exception as e:
+            print('Failed downloading', src, file=sys.stderr)
+            raise
 
 if __name__ == "__main__":
     main()

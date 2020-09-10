@@ -3,7 +3,6 @@ import io
 import os
 import re
 import argparse
-from datetime import datetime
 
 from regexes import REGEXES
 
@@ -103,11 +102,7 @@ def replace(output, lang):
 
     return output
 
-def utctime():
-    return ''
-    return datetime.utcnow().strftime(".%Y_%m_%d_%H_%M_%S_%f")
-
-def process(options):
+def process(options, postfix):
     for opt in options:
         with open(opt.path, 'rb') as fin:
             content = fin.read()
@@ -122,7 +117,7 @@ def process(options):
 
         output = replace(output, opt.lang)
 
-        with open(opt.path + utctime() + '.txt', 'w') as fout:
+        with open(opt.path + postfix, 'w') as fout:
             fout.write(output)
 def main():
     parser = argparse.ArgumentParser()
@@ -131,13 +126,14 @@ def main():
     parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
     parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
     parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
+    parser.add_argument("--postfix", help='postifx (attached to filename at the end)', default='.txt')
 
     args = parser.parse_args()
 
     opts = [Options(args.english_file, args.chunk, 'en', args.n_chars_en),
             Options(args.hebrew_file, args.chunk, 'he', args.n_chars_he)]
 
-    process(opts)
+    process(opts, args.postfix)
 
 if __name__ == "__main__":
     main()
