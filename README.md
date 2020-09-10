@@ -25,6 +25,8 @@ To check the exact paramters of every script run:
 python3 {script_name} --help
 ```
 
+Brief description of each script is provided below.
+
 #### zohar_download_article.py
 
 This script gets a link to an article on kabbalahmedia.info website, 
