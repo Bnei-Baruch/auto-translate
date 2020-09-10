@@ -48,18 +48,20 @@ def paragraphs(content):
 def regex_keep(output, regexes, verbose=False):
     keep = set()
 
-    keep_regex = re.compile('|'.join(f'({r})' for r in regexes), flags=re.MULTILINE)
-    for match in keep_regex.finditer(output):
-        keep.update(tuple(range(match.start(), match.end())))
+    for regex in regexes:
+        keep_regex = re.compile(regex, flags=re.MULTILINE)
+        for match in keep_regex.finditer(output):
+            keep.update(tuple(range(match.start(), match.end())))
 
     return keep
 
 def regex_split(output, regexes):
     split = set()
 
-    split_regex = re.compile('|'.join(f'({r})' for r in regexes), flags=re.MULTILINE)
-    for match in split_regex.finditer(output):
-        split.add(match.end() - 1)
+    for regex in regexes:
+        split_regex = re.compile(regex, flags=re.MULTILINE)
+        for match in split_regex.finditer(output):
+            split.add(match.end() - 1)
 
     return split
 
@@ -118,6 +120,8 @@ def process(options):
             output = split_sentences(output, opt.lang)
         elif opt.mode == 'chars':
             output = '\n'.join(split_characters(output, opt.lang, opt.n))
+        elif opt.mode == 'joined':
+            output = ' '.join(output.split())
 
         output = replace(output, opt.lang)
 
@@ -127,7 +131,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("english_file")
     parser.add_argument("hebrew_file")
-    parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars'], default='paragraphs')
+    parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
     parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
     parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
 

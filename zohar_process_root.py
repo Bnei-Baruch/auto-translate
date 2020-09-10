@@ -28,8 +28,11 @@ def guarded_download(src_dest):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default=SAMPLE_URL)
-    parser.add_argument("--dest", default='zohar/')
+    parser.add_argument("--root", default=SAMPLE_URL, help="root tree url")
+    parser.add_argument("--dest", default='zohar/', help="destination directory")
+    parser.add_argument("--skip-process", dest='skip', action='store_true', help="skip processing (only download)")
+    parser.add_argument("--no-skip-process", dest='skip', action='store_false', help="do not skip processing (default)")
+    parser.set_defaults(skip=False)
 
     args = parser.parse_args()
     sources = sources_list(args.root)
