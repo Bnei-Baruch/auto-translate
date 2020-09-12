@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 
 ### Usage
 
-The scrapping tool contains three major scripts:
+The scrapping tool contains five major scripts:
   * zohar_download_article.py
   * zohar_preprocess_file.py
   * zohar_split_heuristic.py
