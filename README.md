@@ -1,4 +1,4 @@
-# Zohar Scrapping Tool
+# Zohar Scraping Tool
 
 ## User Guide
 
