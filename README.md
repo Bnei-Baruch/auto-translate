@@ -1,4 +1,4 @@
-# Scrapping Tool for kabbalahmedia.info
+# kabbalahmedia.info Scrapping Tool
 
 ## User Guide
 
