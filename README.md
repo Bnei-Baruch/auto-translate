@@ -1,4 +1,4 @@
-# KabbalahMedia Scrapping Tool
+# Zohar Scrapping Tool
 
 ## User Guide
 
