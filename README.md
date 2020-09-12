@@ -54,7 +54,7 @@ Note that in the output of this script, the chunks are divided by two newline ch
 
 #### zohar_create_summary.py
 
-This script gets english and hebrew text files and creates html file for every letter in the input containing chunking summary. 
+This script gets english and hebrew text files and creates html file containing chunking summary for every letter in the input.
   
 #### zohar_process_root.py
   This script runs zohar_download_article.py, zohar_preprocess_article.py, zohar_split_heuristic.py and zohar_create_summary.py on all links contained in the article tree on kabbalahmedia.info website.
