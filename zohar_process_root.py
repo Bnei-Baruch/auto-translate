@@ -77,8 +77,10 @@ def main():
                     Options(he_path, args.chunk, 'he', args.n_chars_he)]
             process(opts, postfix)
 
-            en_split = en_path + '.' + ts + args.split_extension
-            he_split = he_path + '.' + ts + args.split_extension
+            # en_split = en_path + '.' + ts + args.split_extension
+            # he_split = he_path + '.' + ts + args.split_extension
+            en_split = en_path + '.' + src + args.split_extension
+            he_split = he_path + '.' + src + args.split_extension
             en_path += postfix
             he_path += postfix
 
