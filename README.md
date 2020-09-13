@@ -1,4 +1,4 @@
-# Zohar Files Scrapping Tool
+# Zohar Scraping Tool
 
 ## User Guide
 
@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 
 ### Usage
 
-The scrapping tool contains three major scripts:
+The scrapping tool contains five major scripts:
   * zohar_download_article.py
   * zohar_preprocess_file.py
   * zohar_split_heuristic.py
@@ -46,15 +46,15 @@ to clear text files using the following rules:
   * After the initial clear text content is created it is altered using regular expressions describing language specific replace directives.
     These regular expressions are also defined in regex_{lang}.py.
   
-### zohar_split_heuristic.py
+#### zohar_split_heuristic.py
 
 This script gets english and hebrew text files and the maximum number of words per english text entry and outputs new pair of files (or overrides existsing files). Every Ot in the output is split so that the length of every chunk inside does not diverge too much from the requested number of words.
 
 Note that in the output of this script, the chunks are divided by two newline characters ('\n\n').
 
-### zohar_create_summary.py
+#### zohar_create_summary.py
 
-This script gets english and hebrew text files and creates html file for every letter in the input containing chunking summary. 
+This script gets english and hebrew text files and creates html file containing chunking summary for every letter in the input.
   
 #### zohar_process_root.py
   This script runs zohar_download_article.py, zohar_preprocess_article.py, zohar_split_heuristic.py and zohar_create_summary.py on all links contained in the article tree on kabbalahmedia.info website.
@@ -72,5 +72,5 @@ This script gets english and hebrew text files and creates html file for every l
     <dt>REPLACE</dt>
     <dd>Replacement regexes (pairs of items: regex pattern and a replacement string)
     <dt>HIGHLIGHT</dt>
-    <dd>Hightlighted text regexes (the highlighted text can be optionally added to the comments in the summary html)
+    <dd>Hightlighted text regexes (the highlighted text is added to the comments in the summary html)
    </dl>
