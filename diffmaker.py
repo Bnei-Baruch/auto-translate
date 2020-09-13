@@ -44,7 +44,7 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.english_file) as en, open(args.hebrew_file) as he:
+    with open(args.english_file) as en, open(args.hebrew_file, encoding='utf-8') as he:
         diff(en.read(), he.read(), args.sep)
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ import sys
 def discard_non_matching(eng, heb, sep):
     "discards all letters with non-consitetnt chunks number"
 
-    with open(eng) as enf, open(heb) as hef:
+    with open(eng, encoding='utf-8') as enf, open(heb, encoding='utf-8') as hef:
         letters = letters_chunks(enf.read(), hef.read())
 
     en_letters = []
@@ -33,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("english_file", help="path to file containing english text")
     parser.add_argument("hebrew_file", help="path to file contating hebrew text")
-    parser.add_argument("--sep", help="chunks separator", default='\n\n')
+    parser.add_argument("--sep", help="chunks separator", default='\n')
 
     args = parser.parse_args()
     discard_non_matching(args.english_file, args.hebrew_file, args.sep)

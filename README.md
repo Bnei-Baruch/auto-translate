@@ -50,7 +50,7 @@ to clear text files using the following rules:
 
 This script gets english and hebrew text files and the maximum number of words per english text entry and outputs new pair of files (or overrides existsing files). Every Ot in the output is split so that the length of every chunk inside does not diverge too much from the requested number of words.
 
-Note that in the output of this script, the chunks are divided by two newline characters ('\n\n').
+Note that in the output of this script, the chunks are divided by two newline characters ('\n').
 
 #### zohar_create_summary.py
 

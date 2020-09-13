@@ -64,7 +64,7 @@ def webpage(rows, min_ratio, max_ratio, timestamp, title, output):
 def save_summary(eng, heb, sep, minr, maxr, title, ts, output):
     "Creates the summary and prints it to the output file"
 
-    with open(eng) as en, open(heb) as he:
+    with open(eng, encoding='utf-8') as en, open(heb, encoding='utf-8') as he:
          rows = summary(en.read(), he.read(), sep, minr, maxr)
 
     webpage(rows, minr, maxr, ts, title, output)
@@ -73,7 +73,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("english_file", help="path to file containing english text")
     parser.add_argument("hebrew_file", help="path to file contating hebrew text")
-    parser.add_argument("--sep", help="separator character", default='\n\n')
+    parser.add_argument("--sep", help="separator character", default='\n')
     parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
     parser.add_argument("--max_ratio", help="maximum english/hebrew ratio", default=2.0)
     parser.add_argument("--title", help="article title", default='')

@@ -44,10 +44,10 @@ def main():
     parser.add_argument("--discard-non-matching", help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
                         action='store_true', dest='strict')
     parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
-                        action='store_true', dest='strict')
+                        action='store_false', dest='strict')
 
     parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=512)
-    parser.add_argument("--split_extention", help="extension of split files", default='.split.txt')
+    parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
     parser.add_argument("--max_ratio", help="maximum english/hebrew ratio", default=2.0)
@@ -55,7 +55,7 @@ def main():
     parser.add_argument("--summary_name", help="html summary file name", default="summary.html")
 
     parser.set_defaults(skip=False)
-    parser.set_defaults(strict=False)
+    parser.set_defaults(strict=True)
 
     args = parser.parse_args()
     sources = sources_list(args.root)
@@ -77,8 +77,8 @@ def main():
                     Options(he_path, args.chunk, 'he', args.n_chars_he)]
             process(opts, postfix)
 
-            en_split = en_path + '.' + ts + args.split_extention
-            he_split = he_path + '.' + ts + args.split_extention
+            en_split = en_path + '.' + ts + args.split_extension
+            he_split = he_path + '.' + ts + args.split_extension
             en_path += postfix
             he_path += postfix
 
@@ -89,13 +89,13 @@ def main():
 
                 en_path = en_split
                 he_path = he_split
-                sep = '\n\n'
+                sep = '\n'
 
             if args.strict:
                 discard_non_matching(en_path, he_path, sep)
 
             summary = os.path.join(base, args.summary_name)
-            with open(summary, 'w') as f:
+            with open(summary, 'w', encoding='utf-8') as f:
                 save_summary(en_path, he_path, sep, args.min_ratio, args.max_ratio, title, ts, f)
 
         except MissingLanguage:

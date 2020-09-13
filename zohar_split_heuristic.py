@@ -77,13 +77,13 @@ def split_letters(eng, heb, max_en_words, atomic_line):
         en_chunks = ['\n'.join(en_parts[i*en_chunk:(i+1)*en_chunk]) for i in range(n_chunks)]
         he_chunks = ['\n'.join(he_parts[i*he_chunk:(i+1)*he_chunk]) for i in range(n_chunks)]
 
-        append(output_en, letter, '\n\n'.join(en_chunks), 'en')
-        append(output_he, letter, '\n\n'.join(he_chunks), 'he')
+        append(output_en, letter, '\n'.join(en_chunks), 'en')
+        append(output_he, letter, '\n'.join(he_chunks), 'he')
 
     return output_en, output_he
 
 def save_file(letters, path):
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         for letter, content in letters:
             print(letter, end=' ', file=f)
             print(content, file=f)
@@ -91,7 +91,7 @@ def save_file(letters, path):
 def split_and_save(eng, heb, en_words_threshold, atomic_line, en_out, he_out):
     "runs split heuristic and save the output to a file"
 
-    with open(eng) as en, open(heb) as he:
+    with open(eng, encoding='utf-8') as en, open(heb, encoding='utf-8') as he:
         output_en, output_he = split_letters(en.read(), he.read(), en_words_threshold, atomic_line)
 
     save_file(output_en, en_out)

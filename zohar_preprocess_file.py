@@ -135,7 +135,7 @@ def process(options, postfix):
 
         output = replace(output, opt.lang)
 
-        with open(opt.path + postfix, 'w') as fout:
+        with open(opt.path + postfix, 'w', encoding='utf-8') as fout:
             fout.write(output)
 def main():
     parser = argparse.ArgumentParser()
