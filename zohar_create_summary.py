@@ -73,7 +73,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("english_file", help="path to file containing english text")
     parser.add_argument("hebrew_file", help="path to file contating hebrew text")
-    parser.add_argument("--sep", help="separator character", default='\n')
+    parser.add_argument("--sep", help="separator character", default='\n\n')
     parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
     parser.add_argument("--max_ratio", help="maximum english/hebrew ratio", default=2.0)
     parser.add_argument("--title", help="article title", default='')

@@ -30,6 +30,16 @@ def letters_chunks(eng, heb):
     letters = list(sorted(set(en.keys()) | set(he.keys())))
     return [(letter, en.get(letter), he.get(letter)) for letter in letters]
 
+def append(output, letter, content, lang):
+    "append letter entry to output list"
+
+    assert lang in ('he', 'en')
+
+    if lang == 'he':
+        output.append((f'.{letter}', content))
+    else:
+        output.append((f'{letter})', content))
+
 def split_letters(eng, heb, max_en_words, atomic_line):
     """Runs split heuristics. The heuristic works as follows:
             If the number of english words is smaller than max_en_words, the content is left as is.
@@ -42,18 +52,18 @@ def split_letters(eng, heb, max_en_words, atomic_line):
 
     for letter, en, he in letters:
         if not en and he:
-            output_he.append((f'.{letter}', he))
+            append(output_he, letter, he, 'he')
             continue
         if not he and en:
-            output_en.append((f'{letter})', en))
+            append(output_en, letter, en, 'en')
             continue
         if not he and not he:
             continue
 
         n_en = len(en.split())
         if n_en <= max_en_words:
-            output_he.append((f'.{letter}', he))
-            output_en.append((f'{letter})', en))
+            append(output_en, letter, en, 'en')
+            append(output_he, letter, he, 'he')
             continue
 
         n_chunks = math.ceil(n_en / max_en_words)
@@ -67,8 +77,8 @@ def split_letters(eng, heb, max_en_words, atomic_line):
         en_chunks = ['\n'.join(en_parts[i*en_chunk:(i+1)*en_chunk]) for i in range(n_chunks)]
         he_chunks = ['\n'.join(he_parts[i*he_chunk:(i+1)*he_chunk]) for i in range(n_chunks)]
 
-        output_en.append((f'{letter})', '\n\n'.join(en_chunks)))
-        output_he.append((f'.{letter}', '\n\n'.join(he_chunks)))
+        append(output_en, letter, '\n\n'.join(en_chunks), 'en')
+        append(output_he, letter, '\n\n'.join(he_chunks), 'he')
 
     return output_en, output_he
 

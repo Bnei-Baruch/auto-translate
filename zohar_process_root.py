@@ -9,6 +9,7 @@ from datetime import datetime
 from zohar_download_article import download, MissingLanguage
 from zohar_preprocess_file import process, Options
 from zohar_split_heuristic import split_and_save
+from zohar_clear_dirty import discard_non_matching
 from zohar_create_summary import save_summary
 
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
@@ -40,6 +41,11 @@ def main():
     parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
     parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
 
+    parser.add_argument("--discard-non-matching", help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
+                        action='store_true', dest='strict')
+    parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
+                        action='store_true', dest='strict')
+
     parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=512)
     parser.add_argument("--split_extention", help="extension of split files", default='.split.txt')
 
@@ -49,6 +55,7 @@ def main():
     parser.add_argument("--summary_name", help="html summary file name", default="summary.html")
 
     parser.set_defaults(skip=False)
+    parser.set_defaults(strict=False)
 
     args = parser.parse_args()
     sources = sources_list(args.root)
@@ -71,7 +78,7 @@ def main():
             process(opts, postfix)
 
             en_split = en_path + '.' + ts + args.split_extention
-            he_split = he_path + '.' + ts
+            he_split = he_path + '.' + ts + args.split_extention
             en_path += postfix
             he_path += postfix
 
@@ -83,6 +90,9 @@ def main():
                 en_path = en_split
                 he_path = he_split
                 sep = '\n\n'
+
+            if args.strict:
+                discard_non_matching(en_path, he_path, sep)
 
             summary = os.path.join(base, args.summary_name)
             with open(summary, 'w') as f:
