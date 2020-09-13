@@ -15,6 +15,8 @@ SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
 
 def sources_list(base=SAMPLE_URL):
+    "This functions extract list of article ids from kabbalahmedia.info web page"
+
     LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
     
     src = requests.get(base).text
@@ -23,6 +25,8 @@ def sources_list(base=SAMPLE_URL):
     return list({link[len('div id="title-'):-1] for link in links})
 
 def utctime():
+    "this function returns utc time string"
+
     return datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%S_%f")
 
 def main():

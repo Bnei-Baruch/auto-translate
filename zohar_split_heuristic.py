@@ -6,9 +6,13 @@ import re
 import sys
 
 def keep_digit(s):
+    "keeps only digits in the input string and converts them to int"
+
     return int(re.sub('[^0-9]', '', s))
 
 def split_by_letters(contents, lang):
+    "splits the input string by letters (letter = Ot)"
+
     item = regexes.REGEXES[lang].ITEM
 
     parts = re.split(f'({item})', contents, flags=re.MULTILINE)
@@ -18,6 +22,8 @@ def split_by_letters(contents, lang):
     return zip(keys, values)
 
 def letters_chunks(eng, heb):
+    "returns list of triples containing letter number (Ot), english content and hebrew content"
+
     en = dict(split_by_letters(eng, 'en'))
     he = dict(split_by_letters(heb, 'he'))
 
@@ -25,6 +31,11 @@ def letters_chunks(eng, heb):
     return [(letter, en.get(letter), he.get(letter)) for letter in letters]
 
 def split_letters(eng, heb, max_en_words, atomic_line):
+    """Runs split heuristics. The heuristic works as follows:
+            If the number of english words is smaller than max_en_words, the content is left as is.
+            Otherwise, the content is divided into chunk of size slightly larger
+            than max_en_words (it is larger because atomic parts of the text are not split)"""
+
     letters = letters_chunks(eng, heb)
     output_en = []
     output_he = []
@@ -68,6 +79,8 @@ def save_file(letters, path):
             print(content, file=f)
 
 def split_and_save(eng, heb, en_words_threshold, atomic_line, en_out, he_out):
+    "runs split heuristic and save the output to a file"
+
     with open(eng) as en, open(heb) as he:
         output_en, output_he = split_letters(en.read(), he.read(), en_words_threshold, atomic_line)
 

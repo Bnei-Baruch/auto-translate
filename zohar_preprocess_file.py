@@ -38,10 +38,14 @@ def parse_docx(content):
         return paragraphs
 
 def paragraphs(content):
+    "Converts docx file to plain text where paragraphs are separated by a newline character"
+
     pars = parse_docx(content)
     return '\n'.join(p.replace('\n', ' ') for p in pars)
 
-def regex_keep(output, regexes, verbose=False):
+def regex_keep(output, regexes):
+    "gets a string and a list of regexes and returns a set of indexes covering all of matches"
+
     keep = set()
 
     for regex in regexes:
@@ -52,6 +56,8 @@ def regex_keep(output, regexes, verbose=False):
     return keep
 
 def regex_split(output, regexes):
+    "gets a string and a list of regexes and returns a set of the last indexes of every match"
+
     split = set()
 
     for regex in regexes:
@@ -62,21 +68,29 @@ def regex_split(output, regexes):
     return split
 
 def split_by_indexes(output, keep, split):
+    """Splits a string by regexes, `keep` are a set of regexes of patterns where a split is impossible,
+       `split` are regexes of patterns that precede every split"""
+
     indexes = [-1] + list(sorted(set(split) - set(keep))) + [len(output)]
     for i, j in zip(indexes, indexes[1:]):
         yield output[i+1:j+1].strip()
 
 def split_sentences(output, lang):
+    """Splits the string by senteces. The regexes defining the sentences are located in regex_{lang}.py files"""
+
     keep = regex_keep(output, REGEXES[lang].SENTENCES_KEEP, lang == 'he')
     split = regex_split(output, REGEXES[lang].SENTENCES_SPLIT)
 
     return '\n'.join(split_by_indexes(output, keep, split))
 
 def split_characters(output, lang, n_chars):
+    """Splits the string by characters. Avoids splitting in the middle of a word or
+       in the middle of patterns defined by language specific ITEM regex"""
+
     assert lang in ('en', 'he')
 
     item = re.compile(REGEXES[lang].ITEM)
-    space = re.compile('(\s+)')
+    space = re.compile(r'(\s+)')
     chunk = ''
 
     for line in output.split('\n'):
@@ -95,6 +109,8 @@ def split_characters(output, lang, n_chars):
         yield chunk.strip()
 
 def replace(output, lang):
+    "Runs replacement regexes on a string"
+
     pairs = REGEXES[lang].REPLACE
 
     for pattern, repl in pairs:
@@ -103,6 +119,8 @@ def replace(output, lang):
     return output
 
 def process(options, postfix):
+    "the main logic: splits the input into chunks, runs replacement regexes and saves the output"
+
     for opt in options:
         with open(opt.path, 'rb') as fin:
             content = fin.read()

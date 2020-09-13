@@ -53,7 +53,7 @@ def lang_links(txt):
     """This function extracts links per language part from a webpage.
 
     >>> js = 'var obj = {"data":{"he": "http://addr1", "en": "http://addr2"}};'
-    >>> lang_detals(obj)
+    >>> lang_links(js)
     '{"he": "http://addr1", "en": "http://addr2"}'
     """
 

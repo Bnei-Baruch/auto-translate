@@ -5,6 +5,8 @@ import regexes
 import re
 
 def highlight(text, lang):
+    "Searches for text indended to be highlighted using language specific regex"
+
     if not text:
         return ''
 
@@ -16,6 +18,8 @@ def highlight(text, lang):
     return summary
 
 def summary(eng, heb, sep, min_ratio, max_ratio):
+    "Creates letter (Ot) html summary"
+
     letters = letters_chunks(eng, heb)
 
     for letter, en, he in letters:
@@ -38,6 +42,8 @@ def summary(eng, heb, sep, min_ratio, max_ratio):
         yield (letter, len(en_chunks), len(he_chunks), valid, comments)
 
 def webpage(rows, min_ratio, max_ratio, timestamp, title, output):
+    "Creates html summary for all letters"
+
     print(f'<html><head><title>{title}</title></head><body>', file=output)
 
     print('<dl>', file=output)
@@ -56,10 +62,12 @@ def webpage(rows, min_ratio, max_ratio, timestamp, title, output):
     print('</table></body></html>', file=output)
 
 def save_summary(eng, heb, sep, minr, maxr, title, ts, output):
-   with open(eng) as en, open(heb) as he:
-        rows = summary(en.read(), he.read(), sep, minr, maxr)
+    "Creates the summary and prints it to the output file"
 
-   webpage(rows, minr, maxr, ts, title, output)
+    with open(eng) as en, open(heb) as he:
+         rows = summary(en.read(), he.read(), sep, minr, maxr)
+
+    webpage(rows, minr, maxr, ts, title, output)
 
 def main():
     parser = argparse.ArgumentParser()
