@@ -33,7 +33,7 @@ def utctime():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=SAMPLE_URL, help="root tree url")
-    parser.add_argument("--dest", default='zohar/', help="destination directory")
+    parser.add_argument("--dest", default='zohar_en_ru/', help="destination directory")
     parser.add_argument("--skip-process", dest='skip', action='store_true', help="skip processing (only download)")
     parser.add_argument("--no-skip-process", dest='skip', action='store_false', help="do not skip processing (default)")
 
@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
                         action='store_false', dest='strict')
 
-    parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=200)
+    parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=128)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
@@ -68,8 +68,10 @@ def main():
                 continue
 
             lang_paths = dict(paths)
-            en_path = lang_paths['en']
-            he_path = lang_paths['he']
+            # en_path = lang_paths['en']
+            # he_path = lang_paths['he']
+            en_path = lang_paths['ru']
+            he_path = lang_paths['en']
 
             ts = utctime()
             postfix = '.' + ts + '.txt'

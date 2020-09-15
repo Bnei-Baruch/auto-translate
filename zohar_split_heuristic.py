@@ -13,7 +13,8 @@ def keep_digit(s):
 def split_by_letters(contents, lang):
     "splits the input string by letters (letter = Ot)"
 
-    item = regexes.REGEXES[lang].ITEM
+    # item = regexes.REGEXES[lang].ITEM
+    item = regexes.REGEXES['en'].ITEM
 
     parts = re.split(f'({item})', contents, flags=re.MULTILINE)
     keys = [keep_digit(key) for key in parts[1::2]]
@@ -24,8 +25,8 @@ def split_by_letters(contents, lang):
 def letters_chunks(eng, heb):
     "returns list of triples containing letter number (Ot), english content and hebrew content"
 
-    en = dict(split_by_letters(eng, 'en'))
-    he = dict(split_by_letters(heb, 'he'))
+    en = dict(split_by_letters(eng, 'ru'))
+    he = dict(split_by_letters(heb, 'en'))
 
     letters = list(sorted(set(en.keys()) | set(he.keys())))
     return [(letter, en.get(letter), he.get(letter)) for letter in letters]
@@ -33,12 +34,9 @@ def letters_chunks(eng, heb):
 def append(output, letter, content, lang):
     "append letter entry to output list"
 
-    assert lang in ('he', 'en')
+    assert lang in ('ru', 'en')
 
-    if lang == 'he':
-        output.append((f'.{letter}', content))
-    else:
-        output.append((f'{letter})', content))
+    output.append((f'{letter})', content))
 
 def split_letters(eng, heb, max_en_words, atomic_line):
     """Runs split heuristics. The heuristic works as follows:
@@ -62,8 +60,8 @@ def split_letters(eng, heb, max_en_words, atomic_line):
 
         n_en = len(en.split())
         if n_en <= max_en_words:
-            append(output_en, letter, en, 'en')
-            append(output_he, letter, he, 'he')
+            append(output_en, letter, en, 'ru')
+            append(output_he, letter, he, 'en')
             continue
 
         n_chunks = math.ceil(n_en / max_en_words)
@@ -96,8 +94,8 @@ def split_letters(eng, heb, max_en_words, atomic_line):
 
         assert en_full.count('\n') == he_full.count('\n')
 
-        append(output_en, letter, en_full, 'en')
-        append(output_he, letter, he_full, 'he')
+        append(output_en, letter, en_full, 'ru')
+        append(output_he, letter, he_full, 'en')
 
     assert len(output_en) == len(output_he)
     return output_en, output_he
@@ -114,8 +112,6 @@ def split_and_save(eng, heb, en_words_threshold, atomic_line, en_out, he_out):
     with open(eng, encoding='utf-8') as en, open(heb, encoding='utf-8') as he:
         output_en, output_he = split_letters(en.read(), he.read(), en_words_threshold, atomic_line)
 
-    if he_out.split('.')[-3] == 'Uh0TFSOM':
-        pass
     save_file(output_en, en_out)
     save_file(output_he, he_out)
 

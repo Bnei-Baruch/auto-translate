@@ -23,8 +23,8 @@ def discard_non_matching(eng, heb, sep):
         if en_chunks != he_chunks:
             continue
 
-        append(en_letters, letter, en, 'en')
-        append(he_letters, letter, he, 'he')
+        append(en_letters, letter, en, 'ru')
+        append(he_letters, letter, he, 'en')
 
     save_file(en_letters, eng)
     save_file(he_letters, heb)

@@ -19,7 +19,8 @@ ASSET_BASE_URL = 'https://kabbalahmedia.info/assets/sources/'
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 
 # The documents in these languages will be downloaded:
-LANGS = ('en', 'he')
+# LANGS = ('en', 'he')
+LANGS = ('ru', 'en')
 
 # Documents format
 FORMAT = 'docx'
