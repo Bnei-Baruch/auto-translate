@@ -52,12 +52,12 @@ def split_letters(eng, heb, max_en_words, atomic_line):
 
     for letter, en, he in letters:
         if not en and he:
-            append(output_he, letter, he, 'he')
+            # append(output_he, letter, he, 'he')
             continue
         if not he and en:
-            append(output_en, letter, en, 'en')
+            # append(output_en, letter, en, 'en')
             continue
-        if not he and not he:
+        if not he and not en:
             continue
 
         n_en = len(en.split())
@@ -69,17 +69,37 @@ def split_letters(eng, heb, max_en_words, atomic_line):
         n_chunks = math.ceil(n_en / max_en_words)
 
         en_parts = en.split('\n') if atomic_line else en.split()
-        he_parts = he.split('\n') if atomic_line else en.split()
+        he_parts = he.split('\n') if atomic_line else he.split()
 
         he_chunk = math.ceil(len(he_parts) / n_chunks)
         en_chunk = math.ceil(len(en_parts) / n_chunks)
 
         en_chunks = ['\n'.join(en_parts[i*en_chunk:(i+1)*en_chunk]) for i in range(n_chunks)]
+        en_chunks = [re.sub(r'\n+', '', chunk) for chunk in en_chunks]
         he_chunks = ['\n'.join(he_parts[i*he_chunk:(i+1)*he_chunk]) for i in range(n_chunks)]
+        he_chunks = [re.sub(r'\n+', '', chunk) for chunk in he_chunks]
 
-        append(output_en, letter, '\n'.join(en_chunks), 'en')
-        append(output_he, letter, '\n'.join(he_chunks), 'he')
+        assert len(en_chunks) == len(he_chunks)
 
+        en_final_chunks, he_final_chunks = [], []
+        for he_c, en_c in zip(he_chunks, en_chunks):
+            if he_c and en_c:
+                en_final_chunks.append(en_c)
+                he_final_chunks.append(he_c)
+
+        assert len(en_final_chunks) == len(he_final_chunks)
+
+        en_full = '\n'.join(en_final_chunks)
+        en_full = re.sub(r'\n+', '\n', en_full).strip()
+        he_full = '\n'.join(he_final_chunks)
+        he_full = re.sub(r'\n+', '\n', he_full).strip()
+
+        assert en_full.count('\n') == he_full.count('\n')
+
+        append(output_en, letter, en_full, 'en')
+        append(output_he, letter, he_full, 'he')
+
+    assert len(output_en) == len(output_he)
     return output_en, output_he
 
 def save_file(letters, path):
@@ -94,13 +114,15 @@ def split_and_save(eng, heb, en_words_threshold, atomic_line, en_out, he_out):
     with open(eng, encoding='utf-8') as en, open(heb, encoding='utf-8') as he:
         output_en, output_he = split_letters(en.read(), he.read(), en_words_threshold, atomic_line)
 
+    if he_out.split('.')[-3] == 'Uh0TFSOM':
+        pass
     save_file(output_en, en_out)
     save_file(output_he, he_out)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("english_file", help="path to file containing english text")
-    parser.add_argument("hebrew_file", help="path to file contating hebrew text")
+    parser.add_argument("hebrew_file", help="path to file containing hebrew text")
     parser.add_argument("--output_postfix", help="postfix of the output file names", default='.split.txt')
     parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split", default=512)
 
