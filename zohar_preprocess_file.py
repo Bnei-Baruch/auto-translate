@@ -87,9 +87,10 @@ def split_characters(output, lang, n_chars):
     """Splits the string by characters. Avoids splitting in the middle of a word or
        in the middle of patterns defined by language specific ITEM regex"""
 
-    assert lang in ('en', 'he')
-
-    item = re.compile(REGEXES[lang].ITEM)
+    if lang == 'he':
+        item = re.compile(REGEXES['he'].ITEM)
+    else:
+        item = re.compile(REGEXES['en'].ITEM)
     space = re.compile(r'(\s+)')
     chunk = ''
 
@@ -139,17 +140,19 @@ def process(options, postfix):
             fout.write(output)
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("english_file")
-    parser.add_argument("hebrew_file")
+    parser.add_argument("--source", default='he', help="source language")
+    parser.add_argument("--target", default='en', help="target language")
+    parser.add_argument("target_file")
+    parser.add_argument("source_file")
     parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
-    parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
-    parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
+    parser.add_argument("--n_chars_tgt", help='number of chars in an target phrase', default=255)
+    parser.add_argument("--n_chars_src", help='number of chars in a source phrase', default=225)
     parser.add_argument("--postfix", help='postifx (attached to filename at the end)', default='.txt')
 
     args = parser.parse_args()
 
-    opts = [Options(args.english_file, args.chunk, 'en', args.n_chars_en),
-            Options(args.hebrew_file, args.chunk, 'he', args.n_chars_he)]
+    opts = [Options(args.target_file, args.chunk, args.target, args.n_chars_tgt),
+            Options(args.source_file, args.chunk, args.source, args.n_chars_src)]
 
     process(opts, args.postfix)
 

@@ -3,34 +3,34 @@ import argparse
 import sys
 
 
-def diff(eng, heb, sep):
-    letters = letters_chunks(eng, heb)
+def diff(tgt_doc, src_doc, langs, sep):
+    letters = letters_chunks(tgt_doc, src_doc)
     print('<html><head><title>difftool</title></head><body>')
 
-    for letter, en, he in letters:
-        en_chunks = en.strip().split(sep) if en else ()
-        he_chunks = he.strip().split(sep) if he else ()
+    for letter, tgt, src in letters:
+        tgt_chunks = tgt.strip().split(sep) if tgt else ()
+        src_chunks = src.strip().split(sep) if src else ()
 
-        engen = (chunk for chunk in en_chunks)
-        hegen = (chunk for chunk in he_chunks)
+        tgtgen = (chunk for chunk in tgt_chunks)
+        srcgen = (chunk for chunk in src_chunks)
 
         print('<table border="5"><tr><th colspan=2>', letter, '</th></tr>')
-        for en_txt, he_txt in zip(engen, hegen):
+        for tgt_txt, src_txt in zip(tgtgen, srcgen):
             print('<tr>')
             print('<td style="text-direction: ltr; width: 50%">')
-            print(en_txt)
+            print(tgt_txt)
             print('</td><td style="text-direction: rtl">')
-            print(he_txt)
+            print(src_txt)
             print('</td></tr>')
 
-        for en_txt in engen:
+        for tgt_txt in tgtgen:
             print('<tr><td style="text-direction: ltr; width: 50%">')
-            print(en_txt)
+            print(tgt_txt)
             print('</td><td></td></tr>')
 
-        for he_txt in hegen:
+        for src_txt in srcgen:
             print('<tr><td></td><td style="text-direction: rtl">')
-            print(he_txt)
+            print(src_txt)
             print('</td></tr>')
     print('</table>')
 
@@ -38,14 +38,16 @@ def diff(eng, heb, sep):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("english_file")
-    parser.add_argument("hebrew_file")
+    parser.add_argument("--source", default='he', help="source language")
+    parser.add_argument("--target", default='en', help="target language")
+    parser.add_argument("target_file")
+    parser.add_argument("source_file")
     parser.add_argument("--sep", default='\n')
 
     args = parser.parse_args()
-
-    with open(args.english_file) as en, open(args.hebrew_file, encoding='utf-8') as he:
-        diff(en.read(), he.read(), args.sep)
+    langs = (args.source, args.target)
+    with open(args.target_file) as tgt, open(args.source_file, encoding='utf-8') as src:
+        diff(tgt.read(), src.read(), langs, args.sep)
 
 if __name__ == "__main__":
     main()

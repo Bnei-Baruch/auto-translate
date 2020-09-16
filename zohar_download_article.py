@@ -18,10 +18,6 @@ ASSET_BASE_URL = 'https://kabbalahmedia.info/assets/sources/'
 # Sample url with tree links
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 
-# The documents in these languages will be downloaded:
-# LANGS = ('en', 'he')
-LANGS = ('ru', 'en')
-
 # Documents format
 FORMAT = 'docx'
 
@@ -73,7 +69,7 @@ def lang_links(txt):
     
     raise HtmlFormatChanged("Unblanced data section")
 
-def load_assets(article_id, langs=LANGS, fmt=FORMAT):
+def load_assets(article_id, langs, fmt=FORMAT):
     "Downloads article with given id for given languages"
 
     assert langs, 'languages list cannot be empty'
@@ -108,13 +104,14 @@ def file_size(path):
     except FileNotFoundError:
         return -1
 
-def download(_id, dest=''):
-    assets = list(load_assets(_id))
+def download(_id, dest='', langs=('he', 'en')):
+    source, target = langs
+    assets = list(load_assets(_id, langs=langs))
 
     assert assets, "documents number must be equal to LANGS length"
 
     folder = assets[0].formatted_title(_id)
-    base = os.path.join(dest, folder)
+    base = os.path.join(dest, folder).replace("\"", "_")
     os.makedirs(base, exist_ok=True)
 
     paths = []
@@ -124,7 +121,7 @@ def download(_id, dest=''):
         path = os.path.join(base, asset.lang) + '.' + FORMAT
         paths.append((asset.lang, path))
 
-        if asset.lang == 'en':
+        if asset.lang != 'he':# if asset.lang == 'en':
             title = asset.title
 
         if file_size(path) == len(asset.content):
@@ -138,11 +135,13 @@ def download(_id, dest=''):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("url")
+    parser.add_argument("--source", default='he', help="source language")
+    parser.add_argument("--target", default='en', help="target language")
 
     args = parser.parse_args()
- 
+    langs = (args.source, args.target)
     _id = extract_id(url)
-    download(_id)
+    download(_id, langs)
 
 if __name__ == "__main__":
     main()

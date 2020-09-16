@@ -4,6 +4,7 @@ import argparse
 import tqdm
 import sys
 import os
+import shutil
 from datetime import datetime
 
 from zohar_download_article import download, MissingLanguage
@@ -33,24 +34,26 @@ def utctime():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=SAMPLE_URL, help="root tree url")
-    parser.add_argument("--dest", default='zohar_en_ru/', help="destination directory")
+    parser.add_argument("--dest", default='zohar', help="destination directory")
+    parser.add_argument("--source", default='he', help="source language")
+    parser.add_argument("--target", default='en', help="target language")
     parser.add_argument("--skip-process", dest='skip', action='store_true', help="skip processing (only download)")
     parser.add_argument("--no-skip-process", dest='skip', action='store_false', help="do not skip processing (default)")
 
     parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
-    parser.add_argument("--n_chars_en", help='number of chars in an english phrase', default=255)
-    parser.add_argument("--n_chars_he", help='number of chars in a hebrew phrase', default=225)
+    parser.add_argument("--n_chars_tgt", help='number of chars in the target phrase', default=255)
+    parser.add_argument("--n_chars_src", help='number of chars in the source phrase', default=225)
 
     parser.add_argument("--discard-non-matching", help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
                         action='store_true', dest='strict')
     parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
                         action='store_false', dest='strict')
 
-    parser.add_argument("--en_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=128)
+    parser.add_argument("--tgt_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=128)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
-    parser.add_argument("--min_ratio", help="minimum english/hebrew ratio", default=0.5)
-    parser.add_argument("--max_ratio", help="maximum english/hebrew ratio", default=2.0)
+    parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
+    parser.add_argument("--max_ratio", help="maximum target/source ratio", default=2.0)
 
     parser.add_argument("--summary_name", help="html summary file name", default="summary.html")
 
@@ -59,48 +62,50 @@ def main():
 
     args = parser.parse_args()
     sources = sources_list(args.root)
-
+    langs = (args.source, args.target)
+    dest_folder =f'{args.dest}_{args.source}_{args.target}'
+    shutil.rmtree(dest_folder, ignore_errors=True)
     progress = tqdm.tqdm(range(len(sources)))
     for src, _ in zip(sources, progress):
         try:
-            paths, title, base = download(src, args.dest)
+            paths, title, base = download(src, dest_folder, langs)
             if args.skip:
                 continue
 
             lang_paths = dict(paths)
-            # en_path = lang_paths['en']
-            # he_path = lang_paths['he']
-            en_path = lang_paths['ru']
-            he_path = lang_paths['en']
+            tgt_path = lang_paths[args.target]
+            src_path = lang_paths[args.source]
 
             ts = utctime()
             postfix = '.' + ts + '.txt'
-            opts = [Options(en_path, args.chunk, 'en', args.n_chars_en),
-                    Options(he_path, args.chunk, 'he', args.n_chars_he)]
+            opts = [Options(tgt_path, args.chunk, args.target, args.n_chars_tgt),
+                    Options(src_path, args.chunk, args.source, args.n_chars_src)]
             process(opts, postfix)
 
-            # en_split = en_path + '.' + ts + args.split_extension
-            # he_split = he_path + '.' + ts + args.split_extension
-            en_split = en_path + '.' + src + args.split_extension
-            he_split = he_path + '.' + src + args.split_extension
-            en_path += postfix
-            he_path += postfix
+            # tgt_split = tgt_path + '.' + ts + args.split_extension
+            # src_split = src_path + '.' + ts + args.split_extension
+            tgt_split = tgt_path + '.' + src + args.split_extension
+            src_split = src_path + '.' + src + args.split_extension
+            tgt_path += postfix
+            src_path += postfix
 
             sep = '\n'
-            if args.en_words_threshold:
+            if args.tgt_words_threshold:
                 atomic_line = args.chunk != 'joined'
-                split_and_save(en_path, he_path, args.en_words_threshold, atomic_line, en_split, he_split)
+                split_and_save(tgt_path, src_path, langs,
+                               args.tgt_words_threshold, atomic_line, tgt_split, src_split)
 
-                en_path = en_split
-                he_path = he_split
+                tgt_path = tgt_split
+                src_path = src_split
                 sep = '\n'
 
             if args.strict:
-                discard_non_matching(en_path, he_path, sep)
+                discard_non_matching(tgt_path, src_path, langs, sep)
 
             summary = os.path.join(base, args.summary_name)
             with open(summary, 'w', encoding='utf-8') as f:
-                save_summary(en_path, he_path, sep, args.min_ratio, args.max_ratio, title, ts, f)
+                save_summary(tgt_path, src_path, langs,
+                             sep, args.min_ratio, args.max_ratio, title, ts, f)
 
         except MissingLanguage:
             continue

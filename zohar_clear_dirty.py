@@ -7,36 +7,38 @@ from zohar_split_heuristic import append, save_file, letters_chunks
 
 import sys
 
-def discard_non_matching(eng, heb, sep):
-    "discards all letters with non-consitetnt chunks number"
+def discard_non_matching(tgt_doc, src_doc, langs, sep):
+    "discards all letters with non-consistent chunks number"
+    source, target = langs
+    with open(tgt_doc, encoding='utf-8') as tgt_f, open(src_doc, encoding='utf-8') as src_f:
+        letters = letters_chunks(tgt_f.read(), src_f.read(), langs)
 
-    with open(eng, encoding='utf-8') as enf, open(heb, encoding='utf-8') as hef:
-        letters = letters_chunks(enf.read(), hef.read())
+    tgt_letters = []
+    src_letters = []
 
-    en_letters = []
-    he_letters = []
+    for letter, tgt, src in letters:
+        tgt_chunks = len(tgt.split(sep)) if tgt else 0
+        src_chunks = len(src.split(sep)) if src else 0
 
-    for letter, en, he in letters:
-        en_chunks = len(en.split(sep)) if en else 0
-        he_chunks = len(he.split(sep)) if he else 0
-
-        if en_chunks != he_chunks:
+        if tgt_chunks != src_chunks:
             continue
 
-        append(en_letters, letter, en, 'ru')
-        append(he_letters, letter, he, 'en')
+        append(tgt_letters, letter, tgt, target)
+        append(src_letters, letter, src, source)
 
-    save_file(en_letters, eng)
-    save_file(he_letters, heb)
+    save_file(tgt_letters, tgt_doc)
+    save_file(src_letters, src_doc)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("english_file", help="path to file containing english text")
-    parser.add_argument("hebrew_file", help="path to file contating hebrew text")
+    parser.add_argument("--source", default='he', help="source language")
+    parser.add_argument("--target", default='en', help="target language")
+    parser.add_argument("target_file", help="path to file containing target text")
+    parser.add_argument("source_file", help="path to file contating source text")
     parser.add_argument("--sep", help="chunks separator", default='\n')
 
     args = parser.parse_args()
-    discard_non_matching(args.english_file, args.hebrew_file, args.sep)
+    discard_non_matching(args.target_file, args.source_file, (args.source, args.target), args.sep)
 
 if __name__ == "__main__":
     main()
