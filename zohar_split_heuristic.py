@@ -13,11 +13,7 @@ def keep_digit(s):
 def split_by_letters(contents, lang):
     "splits the input string by letters (letter = Ot)"
 
-    if lang == 'he':
-        item = regexes.REGEXES['he'].ITEM
-    else:
-        item = regexes.REGEXES['en'].ITEM
-
+    item = regexes.REGEXES[lang].ITEM
     parts = re.split(f'({item})', contents, flags=re.MULTILINE)
     keys = [keep_digit(key) for key in parts[1::2]]
     values = parts[2::2]
@@ -86,7 +82,7 @@ def split_letters(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
 
         tgt_final_chunks, src_final_chunks = [], []
         for src_c, tgt_c in zip(src_chunks, tgt_chunks):
-            if src_c and tgt_c:
+            if src_c.strip() and tgt_c.strip():
                 tgt_final_chunks.append(tgt_c)
                 src_final_chunks.append(src_c)
 
@@ -98,6 +94,9 @@ def split_letters(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
         src_full = re.sub(r'\n+', '\n', src_full).strip()
 
         assert tgt_full.count('\n') == src_full.count('\n')
+        # if tgt_full.count('\n') != src_full.count('\n'):
+        #     print('LINES MISMATCH - SKIPPING LETTER')
+        #     continue
 
         append(output_tgt, letter, tgt_full, target)
         append(output_src, letter, src_full, source)

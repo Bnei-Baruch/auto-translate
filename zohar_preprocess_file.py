@@ -76,9 +76,9 @@ def split_by_indexes(output, keep, split):
         yield output[i+1:j+1].strip()
 
 def split_sentences(output, lang):
-    """Splits the string by senteces. The regexes defining the sentences are located in regex_{lang}.py files"""
+    """Splits the string by sentences. The regexes defining the sentences are located in regex_{lang}.py files"""
 
-    keep = regex_keep(output, REGEXES[lang].SENTENCES_KEEP, lang == 'he')
+    keep = regex_keep(output, REGEXES[lang].SENTENCES_KEEP)  # lang == 'he')
     split = regex_split(output, REGEXES[lang].SENTENCES_SPLIT)
 
     return '\n'.join(split_by_indexes(output, keep, split))
@@ -87,10 +87,7 @@ def split_characters(output, lang, n_chars):
     """Splits the string by characters. Avoids splitting in the middle of a word or
        in the middle of patterns defined by language specific ITEM regex"""
 
-    if lang == 'he':
-        item = re.compile(REGEXES['he'].ITEM)
-    else:
-        item = re.compile(REGEXES['en'].ITEM)
+    item = re.compile(REGEXES[lang].ITEM)
     space = re.compile(r'(\s+)')
     chunk = ''
 
