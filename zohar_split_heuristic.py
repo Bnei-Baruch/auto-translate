@@ -37,7 +37,7 @@ def append(output, letter, content, lang):
     if lang == 'he':
         output.append((f'.{letter}', content))
     else:
-        output.append((f'{letter})', content))
+        output.append((f'{letter}.', content))
 
 def split_letters(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
     """Runs split heuristics. The heuristic works as follows:

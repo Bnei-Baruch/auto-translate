@@ -13,7 +13,7 @@ from zohar_split_heuristic import split_and_save
 from zohar_clear_dirty import discard_non_matching
 from zohar_create_summary import save_summary
 
-SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
+SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/jYQX6fmA'
 LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
 
 def sources_list(base=SAMPLE_URL):

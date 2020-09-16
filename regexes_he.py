@@ -1,5 +1,5 @@
 ## Item (letter) indicator
-ITEM = r'^\.[0-9]+'
+ITEM = r'^.\d+.'
 
 ## Chunk Regexes
 
