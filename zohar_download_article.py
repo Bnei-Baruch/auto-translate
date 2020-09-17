@@ -67,7 +67,7 @@ def lang_links(txt):
         if balance == 0:
             return txt[start - 1:i + 1]
     
-    raise HtmlFormatChanged("Unblanced data section")
+    raise HtmlFormatChanged("Unbalanced data section")
 
 def load_assets(article_id, langs, fmt=FORMAT):
     "Downloads article with given id for given languages"

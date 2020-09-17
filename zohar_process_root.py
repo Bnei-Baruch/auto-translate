@@ -59,7 +59,7 @@ def main():
 
     parser.set_defaults(skip=False)
     parser.set_defaults(strict=True)
-
+    total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
     args = parser.parse_args()
     sources = sources_list(args.root)
     langs = (args.source, args.target)
@@ -92,15 +92,20 @@ def main():
             sep = '\n'
             if args.tgt_words_threshold:
                 atomic_line = args.chunk != 'joined'
-                split_and_save(tgt_path, src_path, langs,
-                               args.tgt_words_threshold, atomic_line, tgt_split, src_split)
+                letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
+                                                              args.tgt_words_threshold, atomic_line,
+                                                              tgt_split, src_split)
+                total_letters_processed += letters_processed
+                total_letters += n_letters
 
                 tgt_path = tgt_split
                 src_path = src_split
                 sep = '\n'
 
             if args.strict:
-                discard_non_matching(tgt_path, src_path, langs, sep)
+                discarded, kept = discard_non_matching(tgt_path, src_path, langs, sep)
+                total_discarded += discarded
+                total_kept += kept
 
             summary = os.path.join(base, args.summary_name)
             with open(summary, 'w', encoding='utf-8') as f:
@@ -112,6 +117,11 @@ def main():
         except Exception as e:
             print('Failed downloading', src, file=sys.stderr)
             raise
+
+    if args.strict:
+        print('# Letters processed, total letters:',
+              total_letters_processed, total_letters, total_letters_processed/total_letters)
+        print('Total chunks kept, discarded during validation:', total_kept, total_discarded)
 
 if __name__ == "__main__":
     main()

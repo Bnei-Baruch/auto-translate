@@ -31,9 +31,13 @@ def letters_chunks(tgt_doc, src_doc, langs):
     res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
     return res
 
-def append(output, letter, content, lang):
+def append(output, letter, content, lang, letter_only_once=False):
     "append letter entry to output list"
 
+    if letter_only_once:
+        if len(output) > 0:
+            output.append(('', content))
+            return
     if lang == 'he':
         output.append((f'.{letter}', content))
     else:
@@ -50,13 +54,7 @@ def split_letters(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
     output_src = []
 
     for letter, tgt, src in letters:
-        if not tgt and src:
-            # append(output_src, letter, he, 'he')
-            continue
-        if not src and tgt:
-            # append(output_tgt, letter, en, 'en')
-            continue
-        if not src and not tgt:
+        if not tgt or not src:
             continue
 
         n_tgt = len(tgt.split())
@@ -104,6 +102,66 @@ def split_letters(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
     assert len(output_tgt) == len(output_src)
     return output_tgt, output_src
 
+def split_letters_wip(tgt_doc, src_doc, langs, max_tgt_words, atomic_line):
+    """Runs split heuristics. The heuristic works as follows:
+            If the number of english words is smaller than max_tgt_words, the content is left as is.
+            Otherwise, the content is divided into chunk of size slightly larger
+            than max_tgt_words (it is larger because atomic parts of the text are not split)"""
+    source, target = langs
+    letters = letters_chunks(tgt_doc, src_doc, langs)
+    letters_total = len(letters)
+    letters_processed = 0
+    output_tgt = []
+    output_src = []
+
+    for letter, tgt, src in letters:
+        letter_tgt = []
+        letter_src = []
+        if not tgt or not src:
+            continue
+
+        tgt_strip = re.sub(r'\n+', '\n', tgt).strip()
+        src_strip = re.sub(r'\n+', '\n', src).strip()
+        tgt_sents = tgt_strip.split('\n')
+        src_sents = src_strip.split('\n')
+
+        if len(tgt_sents) != len(src_sents):
+            tgt_no_linebreak = tgt_strip.replace('\n', ' ').strip()
+            tgt_sents = tgt_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
+            src_no_linebreak = src_strip.replace('\n', ' ').strip()
+            src_sents = src_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
+
+            if len(tgt_sents) != len(src_sents):
+                n_tgt = len(tgt_strip.split())
+                if n_tgt <= (max_tgt_words+50):
+                    letters_processed += 1
+                    append(output_tgt, letter, tgt_no_linebreak, target, True)
+                    append(output_src, letter, src_no_linebreak, source, True)
+                continue
+
+        tgt_one, src_one = '', ''
+        for tgt_current, src_current in zip(tgt_sents, src_sents):
+            n_tgt = len(tgt_one.split())
+            n_one = len(tgt_current.split())
+            if (n_tgt + n_one) < (max_tgt_words + 50):
+                tgt_one += tgt_current
+                src_one += src_current
+            else:
+                append(letter_tgt, letter, tgt_one, target, True)
+                append(letter_src, letter, src_one, source, True)
+                tgt_one, src_one = tgt_current, src_current
+
+        append(letter_tgt, letter, tgt_one, target, True)
+        append(letter_src, letter, src_one, source, True)
+
+        assert len(letter_tgt) == len(letter_src)
+        letters_processed += 1
+        output_tgt.extend(letter_tgt)
+        output_src.extend(letter_src)
+
+    assert len(output_tgt) == len(output_src)
+    return output_tgt, output_src, letters_processed, letters_total
+
 def save_file(letters, path):
     with open(path, 'w', encoding='utf-8') as f:
         for letter, content in letters:
@@ -114,10 +172,13 @@ def split_and_save(tgt_doc, src_doc, langs, tgt_words_threshold, atomic_line, tg
     "runs split heuristic and save the output to a file"
 
     with open(tgt_doc, encoding='utf-8') as tgt, open(src_doc, encoding='utf-8') as src:
-        output_tgt, output_src = split_letters(tgt.read(), src.read(), langs, tgt_words_threshold, atomic_line)
+        res = split_letters_wip(tgt.read(), src.read(), langs, tgt_words_threshold, atomic_line)
+        output_tgt, output_src, letters_processed, letters_total = res
 
     save_file(output_tgt, tgt_out)
     save_file(output_src, src_out)
+
+    return letters_processed, letters_total
 
 def main():
     parser = argparse.ArgumentParser()
