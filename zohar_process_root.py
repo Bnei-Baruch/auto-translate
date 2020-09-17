@@ -49,7 +49,7 @@ def main():
     parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
                         action='store_false', dest='strict')
 
-    parser.add_argument("--tgt_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=128)
+    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=140)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
@@ -63,10 +63,14 @@ def main():
     args = parser.parse_args()
     sources = sources_list(args.root)
     langs = (args.source, args.target)
+    block = 'en' in langs
+    block_list = ['F2LYqFgK', 'lgUtBujx']
     dest_folder =f'{args.dest}_{args.source}_{args.target}'
     shutil.rmtree(dest_folder, ignore_errors=True)
     progress = tqdm.tqdm(range(len(sources)))
     for src, _ in zip(sources, progress):
+        if block and src in block_list:
+            continue
         try:
             paths, title, base = download(src, dest_folder, langs)
             if args.skip:
@@ -90,10 +94,10 @@ def main():
             src_path += postfix
 
             sep = '\n'
-            if args.tgt_words_threshold:
+            if args.words_threshold:
                 atomic_line = args.chunk != 'joined'
                 letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
-                                                              args.tgt_words_threshold, atomic_line,
+                                                              args.words_threshold, atomic_line,
                                                               tgt_split, src_split)
                 total_letters_processed += letters_processed
                 total_letters += n_letters

@@ -18,6 +18,8 @@ def discard_non_matching(tgt_doc, src_doc, langs, sep):
     src_letters = []
 
     for letter, tgt, src in letters:
+        if src is None or tgt is None:
+            continue
         tgt = re.sub('\n+', '\n', tgt)
         src = re.sub('\n+', '\n', src)
         tgt_chunks = len(tgt.split(sep)) if tgt else 0
