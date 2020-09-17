@@ -10,6 +10,7 @@ import sys
 def discard_non_matching(tgt_doc, src_doc, langs, sep):
     "discards all letters with non-consistent chunks number"
     source, target = langs
+    total_discarded, total_kept = 0, 0
     with open(tgt_doc, encoding='utf-8') as tgt_f, open(src_doc, encoding='utf-8') as src_f:
         letters = letters_chunks(tgt_f.read(), src_f.read(), langs)
 
@@ -17,17 +18,22 @@ def discard_non_matching(tgt_doc, src_doc, langs, sep):
     src_letters = []
 
     for letter, tgt, src in letters:
+        tgt = re.sub('\n+', '\n', tgt)
+        src = re.sub('\n+', '\n', src)
         tgt_chunks = len(tgt.split(sep)) if tgt else 0
         src_chunks = len(src.split(sep)) if src else 0
 
         if tgt_chunks != src_chunks:
+            total_discarded += src_chunks
             continue
 
+        total_kept += src_chunks
         append(tgt_letters, letter, tgt, target)
         append(src_letters, letter, src, source)
 
     save_file(tgt_letters, tgt_doc)
     save_file(src_letters, src_doc)
+    return total_discarded, total_kept
 
 def main():
     parser = argparse.ArgumentParser()

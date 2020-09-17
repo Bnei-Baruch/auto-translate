@@ -16,20 +16,23 @@ from zohar_create_summary import save_summary
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/jYQX6fmA'
 LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
 
+
 def sources_list(base=SAMPLE_URL):
     "This functions extract list of article ids from kabbalahmedia.info web page"
 
     LINK_REGEX = re.compile(r'div id\=\"title\-[A-Za-z0-9]+\"')
-    
+
     src = requests.get(base).text
     links = LINK_REGEX.findall(src)
-    
+
     return list({link[len('div id="title-'):-1] for link in links})
+
 
 def utctime():
     "this function returns utc time string"
 
     return datetime.utcnow().strftime("%Y_%m_%d_%H_%M_%S_%f")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -44,12 +47,16 @@ def main():
     parser.add_argument("--n_chars_tgt", help='number of chars in the target phrase', default=255)
     parser.add_argument("--n_chars_src", help='number of chars in the source phrase', default=225)
 
-    parser.add_argument("--discard-non-matching", help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
+    parser.add_argument("--discard-non-matching",
+                        help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
                         action='store_true', dest='strict')
-    parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
+    parser.add_argument("--no-discard-non-matching",
+                        help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
                         action='store_false', dest='strict')
 
-    parser.add_argument("--tgt_words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=128)
+    parser.add_argument("--tgt_words_threshold",
+                        help="number of words below which the Ot is not split (pass 0 to skip split heuristic)",
+                        default=128)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
@@ -59,11 +66,11 @@ def main():
 
     parser.set_defaults(skip=False)
     parser.set_defaults(strict=True)
-
+    total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
     args = parser.parse_args()
     sources = sources_list(args.root)
     langs = (args.source, args.target)
-    dest_folder =f'{args.dest}_{args.source}_{args.target}'
+    dest_folder = f'{args.dest}_{args.source}_{args.target}'
     shutil.rmtree(dest_folder, ignore_errors=True)
     progress = tqdm.tqdm(range(len(sources)))
     for src, _ in zip(sources, progress):
@@ -92,15 +99,20 @@ def main():
             sep = '\n'
             if args.tgt_words_threshold:
                 atomic_line = args.chunk != 'joined'
-                split_and_save(tgt_path, src_path, langs,
-                               args.tgt_words_threshold, atomic_line, tgt_split, src_split)
+                letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
+                                                              args.tgt_words_threshold, atomic_line,
+                                                              tgt_split, src_split)
+                total_letters_processed += letters_processed
+                total_letters += n_letters
 
                 tgt_path = tgt_split
                 src_path = src_split
                 sep = '\n'
 
             if args.strict:
-                discard_non_matching(tgt_path, src_path, langs, sep)
+                discarded, kept = discard_non_matching(tgt_path, src_path, langs, sep)
+                total_discarded += discarded
+                total_kept += kept
 
             summary = os.path.join(base, args.summary_name)
             with open(summary, 'w', encoding='utf-8') as f:
@@ -112,6 +124,12 @@ def main():
         except Exception as e:
             print('Failed downloading', src, file=sys.stderr)
             raise
+
+    if args.strict:
+        print('# Letters processed, total letters:',
+              total_letters_processed, total_letters, total_letters_processed / total_letters)
+        print('Total chunks kept, discarded during validation:', total_kept, total_discarded)
+
 
 if __name__ == "__main__":
     main()

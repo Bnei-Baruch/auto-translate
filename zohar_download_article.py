@@ -21,8 +21,10 @@ SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 # Documents format
 FORMAT = 'docx'
 
+
 class HtmlFormatChanged(Exception):
     pass
+
 
 class MissingLanguage(Exception):
     def __init__(self, article_id, lang):
@@ -30,9 +32,11 @@ class MissingLanguage(Exception):
         self.article_id = article_id
         self.lang = lang
 
+
 class NoArticleId(Exception):
     def __init__(self, url):
         super().__init__("Could not extract article id from url " + url)
+
 
 class Asset:
     "Web page content and title"
@@ -45,7 +49,8 @@ class Asset:
     def formatted_title(self, _id):
         formatted = self.title.split('|')[0].split('-')[0].strip().replace(' ', '-')
         return f'{formatted}-{_id}'
-        
+
+
 def lang_links(txt):
     """This function extracts links per language part from a webpage.
 
@@ -55,7 +60,7 @@ def lang_links(txt):
     """
 
     START_HINT = '"data":{'
-    
+
     start = txt.find(START_HINT)
     if start < 0:
         raise HtmlFormatChanged("Data start hint not found")
@@ -66,8 +71,9 @@ def lang_links(txt):
         balance += (txt[i] == '{') - (txt[i] == '}')
         if balance == 0:
             return txt[start - 1:i + 1]
-    
-    raise HtmlFormatChanged("Unblanced data section")
+
+    raise HtmlFormatChanged("Unbalanced data section")
+
 
 def load_assets(article_id, langs, fmt=FORMAT):
     "Downloads article with given id for given languages"
@@ -77,14 +83,15 @@ def load_assets(article_id, langs, fmt=FORMAT):
     source_url = SOURCE_BASE_URL.format(lang=langs[0]) + article_id
     src = requests.get(source_url)
     title = lxml.html.fromstring(src.text).findtext('.//title')
-    
+
     links = json.loads(lang_links(src.text))
     for lang in langs:
         if lang not in links:
             raise MissingLanguage(article_id, lang)
-    
+
         url = ASSET_BASE_URL + article_id + '/' + links[lang][fmt]
         yield Asset(requests.get(url).content, title, lang)
+
 
 def extract_id(asset_url):
     """Extracts document id from url.
@@ -95,14 +102,16 @@ def extract_id(asset_url):
     i = asset_url.find(BEFORE_ID)
     if i < 0:
         return NoArticleId(asset_url)
-    
+
     return asset_url[i + len(BEFORE_ID):].split('?')[0]
+
 
 def file_size(path):
     try:
         return Path(path).stat().st_size
     except FileNotFoundError:
         return -1
+
 
 def download(_id, dest='', langs=('he', 'en')):
     source, target = langs
@@ -111,17 +120,17 @@ def download(_id, dest='', langs=('he', 'en')):
     assert assets, "documents number must be equal to LANGS length"
 
     folder = assets[0].formatted_title(_id)
-    base = os.path.join(dest, folder).replace("\"", "_")
+    base = os.path.join(dest, folder).replace("\"", "_").replace("?", "_")
     os.makedirs(base, exist_ok=True)
 
     paths = []
     title = ''
-    
+
     for asset in assets:
         path = os.path.join(base, asset.lang) + '.' + FORMAT
         paths.append((asset.lang, path))
 
-        if asset.lang != 'he':# if asset.lang == 'en':
+        if asset.lang != 'he':  # if asset.lang == 'en':
             title = asset.title
 
         if file_size(path) == len(asset.content):
@@ -131,6 +140,7 @@ def download(_id, dest='', langs=('he', 'en')):
             f.write(asset.content)
 
     return paths, title, base
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -142,6 +152,7 @@ def main():
     langs = (args.source, args.target)
     _id = extract_id(url)
     download(_id, langs)
+
 
 if __name__ == "__main__":
     main()
