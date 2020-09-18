@@ -50,12 +50,13 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line):
             Otherwise, the content is divided into chunk of size slightly larger
             than max_words (it is larger because atomic parts of the text are not split)"""
     source, target = langs
+    if source == 'ru': src_doc = src_doc.replace('«', '“').replace('»', '”')
+    if target == 'ru': tgt_doc = tgt_doc.replace('«', '“').replace('»', '”')
     letters = letters_chunks(tgt_doc, src_doc, langs)
     letters_total = len(letters)
     letters_processed = 0
     output_tgt = []
     output_src = []
-
     for letter, tgt, src in letters:
         letter_tgt = []
         letter_src = []
@@ -76,7 +77,7 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line):
             if len(tgt_sents) != len(src_sents):
                 n_tgt = len(tgt_strip.split())
                 n_src = len(src_strip.split())
-                if n_tgt < (max_words+50) and n_src < (max_words+50):
+                if n_tgt < max_words and n_src < max_words:
                     letters_processed += 1
                     append(output_tgt, letter, tgt_no_linebreak, target, True)
                     append(output_src, letter, src_no_linebreak, source, True)
@@ -88,7 +89,7 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line):
             ln_tgt = len(tgt_current.split())
             n_src = len(src_one.split())
             ln_src = len(src_current.split())
-            if (n_tgt + ln_tgt) < (max_words + 50) and (n_src + ln_src) < (max_words + 50):
+            if (n_tgt + ln_tgt) < max_words and (n_src + ln_src) < max_words:
                 tgt_one += ' ' + tgt_current
                 src_one += ' ' + src_current
             else:
@@ -96,7 +97,7 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line):
                     append(letter_tgt, letter, tgt_one, target, True)
                     append(letter_src, letter, src_one, source, True)
                 tgt_one, src_one = '', ''
-                if ln_tgt < (max_words + 50) and ln_src < (max_words + 50):
+                if ln_tgt < max_words and ln_src < max_words:
                     tgt_one += ' ' + tgt_current
                     src_one += ' ' + src_current
 
@@ -118,8 +119,6 @@ def save_file(letters, path):
             letter = str(letter)
             content = content.strip()
             print(letter+content, file=f)
-            # print(letter, end=' ', file=f)
-            # print(content, file=f)
 
 def split_and_save(tgt_doc, src_doc, langs, words_threshold, atomic_line, tgt_out, src_out):
     "runs split heuristic and save the output to a file"
