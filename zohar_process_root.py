@@ -10,7 +10,7 @@ from datetime import datetime
 from zohar_download_article import download, MissingLanguage
 from zohar_preprocess_file import process, Options
 from zohar_split_heuristic import split_and_save
-from zohar_clear_dirty import discard_non_matching
+from zohar_post_processing import combine_discard_non_matching
 from zohar_create_summary import save_summary
 
 SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
@@ -43,13 +43,15 @@ def main():
     parser.add_argument("--chunk", choices=['paragraphs', 'sentences', 'chars', 'joined'], default='paragraphs')
     parser.add_argument("--n_chars_tgt", help='number of chars in the target phrase', default=255)
     parser.add_argument("--n_chars_src", help='number of chars in the source phrase', default=225)
+    parser.add_argument("--split_ratio", help='only keep sentences which abide by this ratio, pass 0. to disable', default=2.0)
 
     parser.add_argument("--discard-non-matching", help='discard letters (Ot) with different number of chunks in hebrew and in english in split heuristic',
                         action='store_true', dest='strict')
     parser.add_argument("--no-discard-non-matching", help='do not discard letters (Ot) with different number of chunks in hebrew and in english split heuristic',
                         action='store_false', dest='strict')
-
-    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=140)
+    parser.add_argument("--no-combine-letters", help='do not combine letters (Ot) up to the words threshold',
+                        action='store_false', dest='combine_letters')
+    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=300)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
@@ -59,6 +61,7 @@ def main():
 
     parser.set_defaults(skip=False)
     parser.set_defaults(strict=True)
+    parser.set_defaults(combine_letters=True)
     total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
     args = parser.parse_args()
     sources = sources_list(args.root)
@@ -98,7 +101,7 @@ def main():
                 atomic_line = args.chunk != 'joined'
                 letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
                                                               args.words_threshold, atomic_line,
-                                                              tgt_split, src_split)
+                                                              tgt_split, src_split, args.split_ratio)
                 total_letters_processed += letters_processed
                 total_letters += n_letters
 
@@ -107,7 +110,8 @@ def main():
                 sep = '\n'
 
             if args.strict:
-                discarded, kept = discard_non_matching(tgt_path, src_path, langs, sep)
+                discarded, kept = combine_discard_non_matching(tgt_path, src_path, langs, sep,
+                                                               args.words_threshold, args.combine_letters)
                 total_discarded += discarded
                 total_kept += kept
 
