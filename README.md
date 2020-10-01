@@ -74,3 +74,24 @@ This script gets english and hebrew text files and creates html file containing 
     <dt>HIGHLIGHT</dt>
     <dd>Hightlighted text regexes (the highlighted text is added to the comments in the summary html)
    </dl>
+
+### Web Server
+
+To use web server install flask:
+
+```shell
+pip3 install flask
+```
+
+and then run:
+
+```shell
+python3 server.py
+```
+
+To modify the model used by the server edit web/models.py and change ACTIVE class to be the required model class.
+
+Note that by default the server runs on localhost on port 5000. The host and the port are arguments that can be changed.
+To make the server visible from remote computers the host should be 0.0.0.0. However, sometimes root access is required
+to bind this address. It is not advised to run the server as root. An alternative approach would be to put the server
+behind a proxy server, such as nginx or unit: https://unit.nginx.org/howto/flask/.
