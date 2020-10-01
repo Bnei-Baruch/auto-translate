@@ -1,4 +1,4 @@
-// From: https://github.com/mdn/web-dictaphone
+// Based on MDN tutorial: https://github.com/mdn/web-dictaphone
 
 // set up basic variables for app
 
