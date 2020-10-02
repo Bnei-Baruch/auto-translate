@@ -4,6 +4,6 @@ tqdm~=4.43.0
 lxml~=4.5.2
 
 gdown~=3.12.2
-torch~=1.6.0+cpu
+torch~=1.6.0
 transformers~=3.3.1
 flask~=1.1.2
