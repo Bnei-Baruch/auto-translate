@@ -21,7 +21,7 @@
 
 <span class="menu">
 <label for="load"><span class="menu button">טען טקסט</label>
-<input type="file" id="load" />
+<input type="file" id="load" accept=".txt" />
 </span>
 </div>
 
@@ -67,6 +67,9 @@
     }
 
     function send(file) {
+        input.innerText = "";
+        output.innerText = "";
+
         var reader = new FileReader();
 
         reader.onload = event => {input.innerText = event.target.result};
