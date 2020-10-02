@@ -73,20 +73,20 @@
         var reader = new FileReader();
 
         reader.onload = event => {input.innerText = event.target.result};
-        reader.onerror = error => reject(error);
+        reader.onerror = error => {input.innerText = "שגיאה: אין אפשרות להציג את המקור"};
         reader.readAsText(file);
 
         fetch('/', {
             method: 'PUT',
             body: file
         })
-        .then(response => response.text())
+        .then(response => (response.ok ? response.text() : response.statusText))
         .then(text => {
             output.innerText = text;
             edited.focus();
         })
         .catch(error => {
-          console.error('Error:', error);
+            console.error('Error:', error);
         });
     }
 
