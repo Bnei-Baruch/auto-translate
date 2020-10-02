@@ -1,0 +1,136 @@
+@font-face {
+  font-family: 'Stam';
+  src: url('StamSefaradCLM.ttf') format('truetype');
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: linear-gradient(to top, #bdc3c7, #2c3e50);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Nova Mono';
+    text-align: center;
+}
+
+svg.header {
+    height: 25vh;
+    margin-top: 5vh;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#container {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1em;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+}
+
+.text {
+    border-radius: 3px;
+    width: 30%;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    background: white;
+    padding: 1em;
+    color: #2c3e50;
+    text-align: justify;
+}
+
+h1 {
+    text-align: center;
+}
+
+p, ul.text {
+    font-family: sans-serif;
+    line-height: 1.3em;
+    font-size: 14pt;
+}
+
+p, h2, h3 {
+    padding-left: 28pt;
+    padding-right: 28pt;
+}
+
+.hebrew {
+    direction: rtl;
+}
+
+.editable {
+    text-align: left;
+}
+
+.button {
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px 24px;
+    border: 1px solid #afa383;
+    border-radius: 8px;
+    background: #fae9bb;
+    background: -webkit-gradient(linear, left top, left bottom, from(#fae9bb), to(#afa383));
+    background: -moz-linear-gradient(top, #fae9bb, #afa383);
+    background: linear-gradient(to bottom, #fae9bb, #afa383);
+    -webkit-box-shadow: #ffffe0 0px 0px 40px 0px;
+    -moz-box-shadow: #ffffe0 0px 0px 40px 0px;
+    box-shadow: #ffffe0 0px 0px 40px 0px;
+    text-shadow: #fffff3 1px 1px 1px;
+    font: normal normal bold 20px arial;
+    color: #111111;
+    text-decoration: none;
+    font-family: 'Stam' !important;
+}
+.button:hover,
+.button:focus {
+    border: 1px solid #fae9bb;
+    background: #ffffe0;
+    background: -webkit-gradient(linear, left top, left bottom, from(#ffffe0), to(#d2c49d));
+    background: -moz-linear-gradient(top, #ffffe0, #d2c49d);
+    background: linear-gradient(to bottom, #ffffe0, #d2c49d);
+    color: #111111;
+    text-decoration: none;
+}
+.button:active {
+    background: #afa383;
+    background: -webkit-gradient(linear, left top, left bottom, from(#afa383), to(#afa383));
+    background: -moz-linear-gradient(top, #afa383, #afa383);
+    background: linear-gradient(to bottom, #afa383, #afa383);
+}
+
+.title {
+    text-shadow: 2px 2px 13px #aa7758;
+    color: #fae9bb;
+    font-family: 'Stam';
+    font-size: 50pt;
+}
+
+span.menu {
+    width: 30%;
+}
+
+a.menu {
+    font-family: 'Stam';
+}
+
+span.microphone {
+    cursor: pointer;
+    font-size: 40pt;
+    margin-right: 5pt;
+}
+
+span.microphone:hover {
+    text-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
+    transition: all 0.4s ease 0s;
+}
+
+#load {
+    display: none;
+}

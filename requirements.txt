@@ -1,4 +1,9 @@
 python-docx
-requests
-tqdm
-lxml
+requests~=2.24.0
+tqdm~=4.43.0
+lxml~=4.5.2
+
+gdown~=3.12.2
+torch~=1.6.0+cpu
+transformers~=3.3.1
+flask~=1.1.2
