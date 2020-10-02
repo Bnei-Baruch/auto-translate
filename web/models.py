@@ -37,10 +37,12 @@ class TranslationModel:
         self.trained_tok = AutoTokenizer.from_pretrained(mname)
 
     def translate(self, s):
-        trained_batch = self.trained_tok(s, return_tensors='pt').to(self.torch_device)  # , padding=True
+        batch_s = s.split('\n')
+        trained_batch = self.trained_tok(batch_s, return_tensors='pt', padding=True).to(self.torch_device)
         trained_translated = self.trained_model.generate(**trained_batch, num_beams=5, early_stopping=True)
         trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
-        return trained_translated_txt[0]
+        result = '\n'.join(res for res in trained_translated_txt)
+        return result
 
     def __call__(self, mimetype, text):
         if mimetype.startswith("text"):
@@ -49,4 +51,4 @@ class TranslationModel:
         return {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
 
 
-ACTIVE = Model1
+ACTIVE = TranslationModel
