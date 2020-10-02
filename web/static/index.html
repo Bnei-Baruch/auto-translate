@@ -21,7 +21,7 @@
 
 <span class="menu">
 <label for="load"><span class="menu button">טען טקסט</label>
-<input type="file" id="load" accept=".txt" />
+<input type="file" id="load" />
 </span>
 </div>
 
@@ -70,19 +70,16 @@
         input.innerText = "";
         output.innerText = "";
 
-        var reader = new FileReader();
-
-        reader.onload = event => {input.innerText = event.target.result};
-        reader.onerror = error => {input.innerText = "שגיאה: אין אפשרות להציג את המקור"};
-        reader.readAsText(file);
-
         fetch('/', {
             method: 'PUT',
             body: file
         })
-        .then(response => (response.ok ? response.text() : response.statusText))
-        .then(text => {
-            output.innerText = text;
+        .then(response => (response.ok ? response.json() : {"en": response.statusText, "he": "שגיאה"}))
+        .then(texts => {
+            if ("en" in texts)
+                output.innerText = texts["en"];
+            if ("he" in texts)
+                input.innerText = texts["he"];
             edited.focus();
         })
         .catch(error => {

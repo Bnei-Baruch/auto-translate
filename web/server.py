@@ -11,7 +11,7 @@ def index():
 
 @app.route('/', methods=['PUT'])
 def upload():
-    return model(request.get_data())
+    return model(request.mimetype, request.get_data())
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
