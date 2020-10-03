@@ -8,6 +8,7 @@ import torch
 import numpy as np
 import shutil
 from time import time
+from tqdm import trange
 
 
 def process(content, lang='he'):
@@ -63,7 +64,7 @@ class TranslationModel:
         batch_s = s.split('\n')
         if bs != -1:
             n_batches = int(np.ceil(len(batch_s) / bs))
-            for b in range(n_batches):
+            for b in trange(n_batches):
                 start = b*bs
                 end = start+bs
                 curr_batch = batch_s[start:end]
