@@ -43,10 +43,13 @@ class BadModel:
 
 
 class TranslationModel:
-    def __init__(self, bs):
-        self.bs = bs
-        n_cores = psutil.cpu_count()
-        torch.set_num_threads(n_cores)
+    def __init__(self, args):
+        self.bs = args.bs
+        if args.threads == -1:
+            n_cores = psutil.cpu_count()
+            torch.set_num_threads(n_cores)
+        else:
+            torch.set_num_threads(args.threads)
         if not os.path.exists('model'):
             url = 'https://drive.google.com/u/0/uc?id=1JxFMdUAKGjEuGZAMdHnGrMvJrf9YVi-I&export=download'
             output = 'model.zip'
