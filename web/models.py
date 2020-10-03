@@ -9,7 +9,6 @@ import numpy as np
 import shutil
 from time import time
 from tqdm import trange
-import psutil
 
 
 def process(content, lang='he'):
@@ -45,11 +44,8 @@ class BadModel:
 class TranslationModel:
     def __init__(self, args):
         self.bs = args.bs
-        if args.threads == -1:
-            n_cores = psutil.cpu_count()
-            torch.set_num_threads(n_cores)
-        else:
-            torch.set_num_threads(args.threads)
+        if args.threads != -1: torch.set_num_threads(args.threads)
+        print(f'Running with {torch.get_num_threads()} threads.')
         if not os.path.exists('model'):
             url = 'https://drive.google.com/u/0/uc?id=1JxFMdUAKGjEuGZAMdHnGrMvJrf9YVi-I&export=download'
             output = 'model.zip'
