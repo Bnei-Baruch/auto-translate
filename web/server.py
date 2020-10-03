@@ -18,7 +18,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='localhost')
     parser.add_argument('--port', default=5000)
-    parser.add_argument('--bs', default=1)
+    parser.add_argument('--bs', default=1, type=int)
     args = parser.parse_args()
     model = ACTIVE(bs=args.bs)
 
