@@ -31,6 +31,7 @@ def letters_chunks(tgt_doc, src_doc, langs):
     res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
     return res
 
+
 def append(output, letter, content, lang, letter_only_once=False):
     "append letter entry to output list"
     letter = str(letter)
@@ -45,6 +46,7 @@ def append(output, letter, content, lang, letter_only_once=False):
     else:
         output.append((f'{letter}) ', content))
 
+
 def append_str(output, letter, content, lang):
     "append letter entry to output list"
     if lang == 'he':
@@ -53,6 +55,54 @@ def append_str(output, letter, content, lang):
         output += f'{letter}) {content.strip()} '
     return output
 
+
+def split_letters_source(src_doc, max_words, source):
+    if source == 'ru':
+        src_doc = src_doc.replace('«', '“').replace('»', '”')
+    if source == 'he':
+        src_doc = re.sub(r'[a-zA-Z]+', '', src_doc)
+        src_doc = re.sub(r'[\u0591-\u05BD\u05BF-\u05C2\u05C4-\u05C7]', '', src_doc)
+        src_doc = '.'.join(sent for sent in src_doc.split('.') if ('דף' not in sent and 'כרך' not in sent))
+    else:
+        src_doc = re.sub(r'[\u0590-\u05fe]+', '', src_doc)
+
+    src_doc = src_doc.replace('שגיאה! הסימניה אינה מוגדרת', '')
+    src_doc = re.sub('[\(\[].*?[\)\]]', '', src_doc)
+
+    letters = letters_chunks(src_doc, src_doc, (source, source))
+    letters_total = len(letters)
+    letters_processed = 0
+    output_src = []
+    for letter, _, src in letters:
+        letter_src = []
+        if not src:
+            continue
+
+        src = re.sub(r'\d+', '', src)
+        src_strip = re.sub(r'\n+', '\n', src).strip()
+        src_sents = src_strip.split('\n')
+
+        src_one = ''
+        for src_current in src_sents:
+            n_src = len(src_one.split())
+            ln_src = len(src_current.split())
+            if (n_src + ln_src) < max_words:
+                src_one += ' ' + src_current
+            else:
+                if src_one:
+                    append(letter_src, letter, src_one, source, True)
+                src_one = ''
+                # if ln_src < max_words: # when translating, keep all sentences and do our best...
+                src_one += ' ' + src_current
+
+        if src_one:
+            append(letter_src, letter, src_one, source, True)
+
+        if letter_src:
+            letters_processed += 1
+            output_src.extend(letter_src)
+
+    return output_src, letters_processed, letters_total
 
 def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
     """Runs split heuristics. The heuristic works as follows:
@@ -147,6 +197,16 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
 
     assert len(output_tgt) == len(output_src)
     return output_tgt, output_src, letters_processed, letters_total
+
+
+def join_text(letters):
+    s = ''
+    for letter, content in letters:
+        letter = str(letter)
+        content = content.strip()
+        s += letter+content+'\n'
+    return s
+
 
 def save_file(letters, path):
     with open(path, 'w', encoding='utf-8') as f:
