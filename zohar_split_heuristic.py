@@ -78,29 +78,28 @@ def split_letters_source(src_doc, max_words, source):
         if not src:
             continue
 
-        src = re.sub(r'\d+', '', src)
+        # src = re.sub(r'\d+', '', src)
         # src_strip = re.sub(r'\n+', '\n', src).strip()
         # src_sents = src_strip.split('\n')
-        src_strip = re.sub(r'\n+', '. ', src).strip()
-        src_sents = src_strip.split('. ')
+        src_strip = re.sub(r'\n+', '.', src).strip()
+        src_sents = src_strip.split('.')
 
         src_one = ''
         for src_current in src_sents:
             n_src = len(src_one.split())
             ln_src = len(src_current.split())
             if (n_src + ln_src) < max_words:
-                src_one += ' ' + src_current
+                src_one += src_current.strip() + ' '
             else:
                 if src_one:
                     append(letter_src, letter, src_one, source, True)
                 src_one = ''
                 # if ln_src < max_words:
                 assert ln_src < max_words, 'TOO LONG'
-                src_one += ' ' + src_current
-
+                src_one += src_current.strip() + ' '
 
         if src_one:
-            append(letter_src, letter, src_one, source, True)
+            append(letter_src, letter, src_one.strip(), source, True)
 
         if letter_src:
             letters_processed += 1
@@ -148,8 +147,8 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
         if not tgt or not src:
             continue
 
-        tgt = re.sub(r'\d+', '', tgt)
-        src = re.sub(r'\d+', '', src)
+        # tgt = re.sub(r'\d+', '', tgt)
+        # src = re.sub(r'\d+', '', src)
         tgt_strip = re.sub(r'\n+', '\n', tgt).strip()
         src_strip = re.sub(r'\n+', '\n', src).strip()
         tgt_sents = tgt_strip.split('\n')
@@ -208,7 +207,7 @@ def join_text(letters):
     for letter, content in letters:
         letter = str(letter)
         content = content.strip()
-        s += letter+content+'\n'
+        s += letter+content+'. \n'
     return s
 
 
