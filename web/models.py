@@ -61,6 +61,7 @@ class TranslationModel:
 
     def get_translated_text(self, text):
         trained_batch = self.trained_tok(text, return_tensors='pt', padding=True).to(self.torch_device)
+        assert len(trained_batch['input_ids'][0]) < 512, 'Tokenized batch too long!'
         trained_translated = self.trained_model.generate(**trained_batch, num_beams=1, early_stopping=False)
         trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
         return trained_translated_txt
@@ -89,7 +90,7 @@ class TranslationModel:
             return {'en': self.translate(txt), 'he': txt}
         elif mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
             processed_content = process(content)
-            split_txt = split_content(processed_content, max_words=300, source='he')
+            split_txt = split_content(processed_content, max_words=200, source='he')
             txt = join_text(split_txt)
             return {'en': self.translate(txt), 'he': txt}
         return {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}

@@ -79,8 +79,10 @@ def split_letters_source(src_doc, max_words, source):
             continue
 
         src = re.sub(r'\d+', '', src)
-        src_strip = re.sub(r'\n+', '\n', src).strip()
-        src_sents = src_strip.split('\n')
+        # src_strip = re.sub(r'\n+', '\n', src).strip()
+        # src_sents = src_strip.split('\n')
+        src_strip = re.sub(r'\n+', '. ', src).strip()
+        src_sents = src_strip.split('. ')
 
         src_one = ''
         for src_current in src_sents:
@@ -92,8 +94,10 @@ def split_letters_source(src_doc, max_words, source):
                 if src_one:
                     append(letter_src, letter, src_one, source, True)
                 src_one = ''
-                # if ln_src < max_words: # when translating, keep all sentences and do our best...
+                # if ln_src < max_words:
+                assert ln_src < max_words, 'TOO LONG'
                 src_one += ' ' + src_current
+
 
         if src_one:
             append(letter_src, letter, src_one, source, True)
