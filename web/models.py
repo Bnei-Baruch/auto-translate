@@ -59,6 +59,12 @@ class TranslationModel:
         self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
         self.trained_tok = AutoTokenizer.from_pretrained(mname)
 
+    def get_translated_text(self, text):
+        trained_batch = self.trained_tok(text, return_tensors='pt', padding=True).to(self.torch_device)
+        trained_translated = self.trained_model.generate(**trained_batch, num_beams=1, early_stopping=False)
+        trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
+        return trained_translated_txt
+
     def translate(self, s):
         bs = self.bs
         t = time()
@@ -70,15 +76,9 @@ class TranslationModel:
                 start = b*bs
                 end = start+bs
                 curr_batch = batch_s[start:end]
-                trained_batch = self.trained_tok(curr_batch, return_tensors='pt', padding=True).to(self.torch_device)
-                trained_translated = self.trained_model.generate(**trained_batch, num_beams=5, early_stopping=True)
-                trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
-                res_arr.extend(trained_translated_txt)
+                res_arr.extend(self.get_translated_text(curr_batch))
         else:
-            trained_batch = self.trained_tok(batch_s, return_tensors='pt', padding=True).to(self.torch_device)
-            trained_translated = self.trained_model.generate(**trained_batch, num_beams=5, early_stopping=True)
-            trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
-            res_arr = trained_translated_txt
+            res_arr = self.get_translated_text(s)
         result = '\n'.join(res for res in res_arr)
         print(f'Time taken: {time() - t}, batch size: {bs}')
         return result
