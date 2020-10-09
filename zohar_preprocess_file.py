@@ -37,11 +37,14 @@ def parse_docx(content):
         paragraphs = [p.text for p in doc.paragraphs]
         return paragraphs
 
+def keep_paragraph(p):
+    return p[:1].isdigit() or len(p.split()) > 8
+
 def paragraphs(content):
     "Converts docx file to plain text where paragraphs are separated by a newline character"
 
     pars = parse_docx(content)
-    return '\n'.join(p.replace('\n', ' ') for p in pars)
+    return '\n'.join(p.replace('\n', ' ') for p in pars if keep_paragraph(p))
 
 def regex_keep(output, regexes):
     "gets a string and a list of regexes and returns a set of indexes covering all of matches"

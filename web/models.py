@@ -4,6 +4,7 @@ import os
 import gdown
 from zipfile import ZipFile
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from fairseq.models.transformer import TransformerModel
 import torch
 import numpy as np
 import shutil
@@ -20,8 +21,8 @@ def process(content, lang='he'):
 
 def split_content(content, max_words, source):
     res = split_letters_source(content, max_words=max_words, source=source)
-    output, letters_processed, letters_total = res
-    print(f'Processed {letters_processed} letters out of {letters_total} ({100*letters_processed/letters_total}%)')
+    output, words_processed, words_total = res
+    print(f'Processed {words_processed} words out of {words_total} ({100*words_processed/words_total}%)')
     return output
 
 class Model1:
@@ -44,26 +45,57 @@ class BadModel:
 class TranslationModel:
     def __init__(self, args):
         self.bs = args.bs
+        self.backend = args.backend
         if args.threads != -1: torch.set_num_threads(args.threads)
         print(f'Running with {torch.get_num_threads()} threads.')
-        if not os.path.exists('model'):
-            url = 'https://drive.google.com/u/0/uc?id=1JxFMdUAKGjEuGZAMdHnGrMvJrf9YVi-I&export=download'
-            output = 'model.zip'
-            gdown.download(url, output, quiet=False)
-            with ZipFile('model.zip', 'r') as zipf:
-                zipf.extractall()
-            shutil.move('content/model', 'model')
-            shutil.rmtree('content')
-        mname = 'model'
-        self.torch_device = 'cpu'
-        self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
-        self.trained_tok = AutoTokenizer.from_pretrained(mname)
+        if self.backend == 'huggingface':
+            if not os.path.exists('hf_model'):
+                # url = 'https://drive.google.com/u/0/uc?id=1JxFMdUAKGjEuGZAMdHnGrMvJrf9YVi-I&export=download' #v4
+                url = 'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download' #new
+                output = 'model.zip'
+                gdown.download(url, output, quiet=False)
+                with ZipFile('model.zip', 'r') as zipf:
+                    zipf.extractall()
+                shutil.move('content/model', 'hf_model')
+                shutil.rmtree('content')
+            mname = 'model'
+            self.torch_device = 'cpu'
+            self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
+            self.trained_tok = AutoTokenizer.from_pretrained(mname)
+        elif self.backend == 'fairseq':
+            if not os.path.exists('fairseq_model'):
+                url = 'https://drive.google.com/u/0/uc?id=1seEou8d0SrzjQ133YZsh5TMNZIy7EBPX&export=download'
+                output = 'fairseq_model.zip'
+                gdown.download(url, output, quiet=False)
+                with ZipFile('fairseq_model.zip', 'r') as zipf:
+                    zipf.extractall()
+                # shutil.move('content/model', 'fairseq_model')
+                # shutil.rmtree('content')
+            if not os.path.exists('he_dict'):
+                url = 'https://drive.google.com/u/0/uc?id=1z_Efnsf_zS3g1cgRLYLRYSCwKHg8qTxA&export=download'
+                output = 'he_dict'
+                gdown.download(url, output, quiet=False)
+            mname = 'checkpoint_best.pt'
+            he2en = TransformerModel.from_pretrained(
+                '.',
+                checkpoint_file=mname,
+                data_name_or_path='.',
+                bpe='fastbpe',
+                bpe_codes='fairseq_codes'
+            )
+            self.trained_model = he2en
 
     def get_translated_text(self, text):
-        trained_batch = self.trained_tok(text, return_tensors='pt', padding=True).to(self.torch_device)
-        assert len(trained_batch['input_ids'][0]) < 512, 'Tokenized batch too long!'
-        trained_translated = self.trained_model.generate(**trained_batch, num_beams=1, early_stopping=False)
-        trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
+        text = [t for t in text if t]
+        trained_translated_txt = ['']
+        if not text: return trained_translated_txt
+        if self.backend == 'huggingface':
+            trained_batch = self.trained_tok(text, return_tensors='pt', padding=True).to(self.torch_device)
+            assert len(trained_batch['input_ids'][0]) < 512, 'Tokenized batch too long!'
+            trained_translated = self.trained_model.generate(**trained_batch, num_beams=1, early_stopping=False)
+            trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
+        elif self.backend == 'fairseq':
+            trained_translated_txt = self.trained_model.translate(text)
         return trained_translated_txt
 
     def translate(self, s):

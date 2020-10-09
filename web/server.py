@@ -20,6 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', default=5000)
     parser.add_argument('--bs', default=1, type=int)
     parser.add_argument('--threads', default=-1, type=int)
+    parser.add_argument('--backend', default='huggingface')
     args = parser.parse_args()
     model = ACTIVE(args)
 
