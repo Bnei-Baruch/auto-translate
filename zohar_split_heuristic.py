@@ -50,9 +50,9 @@ def append(output, letter, content, lang, letter_only_once=False):
 def append_str(output, letter, content, lang):
     "append letter entry to output list"
     if lang == 'he':
-        output += f'.{letter} {content.strip()} '
+        output += f'.{letter} {content.strip()}. '
     else:
-        output += f'{letter}) {content.strip()} '
+        output += f'{letter}) {content.strip()}. '
     return output
 
 
@@ -70,8 +70,8 @@ def split_letters_source(src_doc, max_words, source):
     src_doc = re.sub('[\(\[].*?[\)\]]', '', src_doc)
 
     letters = letters_chunks(src_doc, src_doc, (source, source))
-    letters_total = len(letters)
-    letters_processed = 0
+    words_total = 0
+    words_processed = 0
     output_src = []
     for letter, _, src in letters:
         letter_src = []
@@ -88,6 +88,7 @@ def split_letters_source(src_doc, max_words, source):
         for src_current in src_sents:
             n_src = len(src_one.split())
             ln_src = len(src_current.split())
+            words_total += ln_src
             if (n_src + ln_src) < max_words:
                 src_one += src_current.strip() + ' '
             else:
@@ -97,15 +98,15 @@ def split_letters_source(src_doc, max_words, source):
                 # if ln_src < max_words:
                 assert ln_src < max_words, 'TOO LONG'
                 src_one += src_current.strip() + ' '
+            words_processed += ln_src
 
         if src_one:
             append(letter_src, letter, src_one.strip(), source, True)
 
         if letter_src:
-            letters_processed += 1
             output_src.extend(letter_src)
 
-    return output_src, letters_processed, letters_total
+    return output_src, words_processed, words_total
 
 def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
     """Runs split heuristics. The heuristic works as follows:
@@ -137,8 +138,9 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
     src_doc = re.sub('[\(\[].*?[\)\]]', '', src_doc)
 
     letters = letters_chunks(tgt_doc, src_doc, langs)
-    letters_total = len(letters)
-    letters_processed = 0
+    # words_total = len(letters)
+    words_total = 0
+    words_processed = 0
     output_tgt = []
     output_src = []
     for letter, tgt, src in letters:
@@ -163,9 +165,10 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
             if len(tgt_sents) != len(src_sents):
                 n_tgt = len(tgt_strip.split())
                 n_src = len(src_strip.split())
+                words_total += n_src
                 ratio = True if not use_ratio else min_ratio < (n_tgt / n_src) < max_ratio
                 if n_tgt < max_words and n_src < max_words and ratio:
-                    letters_processed += 1
+                    words_processed += n_src
                     append(output_tgt, letter, tgt_no_linebreak, target, True)
                     append(output_src, letter, src_no_linebreak, source, True)
                 continue
@@ -176,12 +179,14 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
             ln_tgt = len(tgt_current.split())
             n_src = len(src_one.split())
             ln_src = len(src_current.split())
+            words_total += ln_src
             ratio = True if not use_ratio else min_ratio < (ln_tgt / ln_src) < max_ratio
             if (n_tgt + ln_tgt) < max_words and (n_src + ln_src) < max_words and ratio:
                 tgt_one += ' ' + tgt_current
                 src_one += ' ' + src_current
             else:
                 if tgt_one and src_one:
+                    words_processed += n_src
                     append(letter_tgt, letter, tgt_one, target, True)
                     append(letter_src, letter, src_one, source, True)
                 tgt_one, src_one = '', ''
@@ -190,16 +195,16 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
                     src_one += ' ' + src_current
 
         if tgt_one and src_one:
+            words_processed += len(src_one.split())
             append(letter_tgt, letter, tgt_one, target, True)
             append(letter_src, letter, src_one, source, True)
 
         if letter_tgt and letter_src:
-            letters_processed += 1
             output_tgt.extend(letter_tgt)
             output_src.extend(letter_src)
 
     assert len(output_tgt) == len(output_src)
-    return output_tgt, output_src, letters_processed, letters_total
+    return output_tgt, output_src, words_processed, words_total
 
 
 def join_text(letters):
