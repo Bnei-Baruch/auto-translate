@@ -50,9 +50,9 @@ def append(output, letter, content, lang, letter_only_once=False):
 def append_str(output, letter, content, lang):
     "append letter entry to output list"
     if lang == 'he':
-        output += f'.{letter} {content.strip()}. '
+        output += f'.{letter} {content.strip()} '
     else:
-        output += f'{letter}) {content.strip()}. '
+        output += f'{letter}) {content.strip()} '
     return output
 
 
@@ -82,7 +82,7 @@ def split_letters_source(src_doc, max_words, source):
         # src_strip = re.sub(r'\n+', '\n', src).strip()
         # src_sents = src_strip.split('\n')
         src_strip = re.sub(r'\n+', '.', src).strip()
-        src_sents = src_strip.split('.')
+        src_sents = [s+'.' for s in src_strip.split('.') if s]
 
         src_one = ''
         for src_current in src_sents:
@@ -212,7 +212,8 @@ def join_text(letters):
     for letter, content in letters:
         letter = str(letter)
         content = content.strip()
-        s += letter+content+'. \n'
+        if letter and content:
+            s += letter+content+'\n'
     return s
 
 
