@@ -51,7 +51,7 @@ def main():
                         action='store_false', dest='strict')
     parser.add_argument("--no-combine-letters", help='do not combine letters (Ot) up to the words threshold',
                         action='store_false', dest='combine_letters')
-    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=256)
+    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=224)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
@@ -61,7 +61,7 @@ def main():
 
     parser.set_defaults(skip=False)
     parser.set_defaults(strict=True)
-    parser.set_defaults(combine_letters=False)
+    parser.set_defaults(combine_letters=True)
     total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
     args = parser.parse_args()
     sources = sources_list(args.root)

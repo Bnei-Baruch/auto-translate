@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>זוהר טרנסלייט</title>
+    <title>Zohar Translate</title>
     <meta charset="UTF-8">
     <base href="/static/">
 
@@ -10,17 +10,17 @@
 
 <body>
 
-<h1 class="title">זוהר טרנסלייט</h1>
+<h1 class="title">Zohar Translate</h1>
 
 <div class="container">
-<span class="menu"><span id="save" class="menu button">שמור טקסט</span></span>
+<span class="menu"><span id="save" class="menu button">Save Text</span></span>
 <span class="menu">
     <span class="microphone" disabled="true">🎙</span>
     <audio class="audio" controls="true" disabled="true"></audio>
 </span>
 
 <span class="menu">
-    <label for="load"><span class="menu button">טען טקסט</span></label>
+    <label for="load"><span class="menu button">Load Text</span></label>
     <input type="file" id="load" />
 </span>
 </div>
@@ -48,7 +48,7 @@
     const edited = document.getElementById("edited")
 
     function download(text) {
-        var filename = prompt('שם הקובץ:');
+        var filename = prompt('File name:');
         if (!filename)
             return;
         if (!filename.endsWith('.txt'))
@@ -78,6 +78,7 @@
         .then(texts => {
             if ("en" in texts)
                 output.innerText = texts["en"];
+                edited.innerText = texts["en"];
             if ("he" in texts)
                 input.innerText = texts["he"];
             edited.focus();

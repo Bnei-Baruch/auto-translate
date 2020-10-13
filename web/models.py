@@ -124,7 +124,10 @@ class TranslationModel:
             processed_content = process(content)
             split_txt = split_content(processed_content, max_words=200, source='he')
             txt = join_text(split_txt)
-            return {'en': self.translate(txt), 'he': txt}
+            translated_txt = self.translate(txt)
+            txt = '\n\n'.join(txt.split('\n'))
+            translated_txt = '\n\n'.join(translated_txt.split('\n'))
+            return {'en': translated_txt, 'he': txt}
         return {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
 
 
