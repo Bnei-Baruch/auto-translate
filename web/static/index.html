@@ -57,12 +57,14 @@
         input.innerText = "";
         edited.innerText = "";
         const size = file.size / 1000;
-        const seconds = size * 6.3;
+        const seconds = size * 8;
         const minutes = seconds / 60;
+        const show_minutes = minutes;
+        const show_seconds = seconds / 3;
         if (minutes >= 1)
-            alert("Translation will take approximately: " + minutes.toFixed(1) + " minutes.");
+            alert("Translation will take approximately: " + show_minutes.toFixed(1) + " minutes.");
         if (minutes < 1)
-            alert("Translation will take approximately: " + seconds.toFixed(1) + " seconds.");
+            alert("Translation will take approximately: " + show_seconds.toFixed(1) + " seconds.");
         fetch('/', {
             method: 'PUT',
             body: file
