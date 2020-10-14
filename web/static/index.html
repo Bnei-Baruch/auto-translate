@@ -12,11 +12,14 @@
 
 <h1 class="title">זוהר טרנסלייט</h1>
 
+<span id="enabled">
+
 <div class="container">
 <span class="menu"><span id="save" class="menu button">שמור טקסט</span></span>
 <span class="menu">
     <span class="microphone" disabled="true">🎙</span>
     <audio class="audio" controls="true" disabled="true"></audio>
+    <span id="clipboard" disabled="true">📋</span>
 </span>
 
 <span class="menu">
@@ -38,14 +41,25 @@
 
 </div>
 
+</span>
+
+<span id="disabled">
+⏳
+</span>
+
 <script type="text/javascript" src="dictaphone.js"></script>
 <script type="text/javascript">
     const load = document.getElementById("load");
     const save = document.getElementById("save");
 
+    const clipboard = document.getElementById("clipboard");
+
     const input = document.getElementById("input")
     const output = document.getElementById("output")
     const edited = document.getElementById("edited")
+
+    const enabled = document.getElementById('enabled');
+    const disabled = document.getElementById('disabled');
 
     function download(text) {
         var filename = prompt('שם הקובץ:');
@@ -66,9 +80,15 @@
         document.body.removeChild(element);
     }
 
+    function disableEnable(enable) {
+        enabled.style.display = enable ? 'inline' : 'none';
+        disabled.style.display = enable ? 'none' : 'inline';
+    }
+
     function send(file) {
         input.innerText = "";
         output.innerText = "";
+        disableEnable(false);
 
         fetch('/', {
             method: 'PUT',
@@ -80,10 +100,27 @@
                 output.innerText = texts["en"];
             if ("he" in texts)
                 input.innerText = texts["he"];
+            disableEnable(true);
             edited.focus();
         })
         .catch(error => {
             console.error('Error:', error);
+            disableEnable(true);
+        });
+    }
+
+    function copyOutput(text) {
+        if (!navigator.clipboard) {
+            alert("You must use Ctrl+A and Ctrl+C to copy to clipboard");
+            return;
+        }
+        navigator.clipboard.writeText(text).then(function() {
+            clipboard.className = "textCopiedAnimation";
+            setTimeout(() => {
+                clipboard.className = "";
+            }, 1000);
+        }, function(err) {
+            alert("You must use Ctrl+A and Ctrl+C to copy to clipboard");
         });
     }
 
@@ -94,6 +131,10 @@
     save.addEventListener('click', (event) => {
         const text = document.querySelector('.editable');
         download(text.innerText);
+    });
+
+    clipboard.addEventListener('click', (event) => {
+        copyOutput(output.innerText);
     });
 </script>
 </body>

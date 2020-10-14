@@ -126,11 +126,33 @@ span.microphone {
     margin-right: 5pt;
 }
 
-span.microphone:hover {
+#clipboard {
+    cursor: pointer;
+    font-size: 40pt;
+    margin-left: 5pt;
+}
+
+span.microphone:hover, #clipboard:hover {
     text-shadow: 0px 0px 20px rgba(255, 255, 255, 1);
     transition: all 0.4s ease 0s;
 }
 
 #load {
     display: none;
+}
+
+#disabled {
+    font-size: 40pt;
+    display: none;
+}
+
+.textCopiedAnimation {
+    animation: textCopied 1s 1;
+}
+
+@keyframes textCopied 
+{
+    0%      {text-shadow: 0px 0px 20px rgba(255, 255, 255, 1);}
+    50%     {text-shadow: 0px 0px 20px rgba(0, 255, 255, 1);}
+    100%     {text-shadow: 0px 0px 20px rgba(255, 255, 255, 1);}
 }
