@@ -13,7 +13,6 @@
 <h1 class="title">Zohar Translate</h1>
 
 <div class="container">
-<!--<span class="menu"><span id="save" class="menu button">Save Text</span></span>-->
 <span class="menu"><span id="copy" class="menu button">Copy Text</span></span>
 <span class="menu">
     <span class="microphone" disabled="true">🎙</span>
@@ -31,9 +30,6 @@
 <span contenteditable="true" class="editable text" id="edited">
 </span>
 
-<span class="text" id="output">
-</span>
-
 <span class="hebrew text" id="input">
 </span>
 
@@ -42,31 +38,11 @@
 <script type="text/javascript" src="dictaphone.js"></script>
 <script type="text/javascript">
     const load = document.getElementById("load");
-    // const save = document.getElementById("save");
     const copy = document.getElementById("copy");
 
     const input = document.getElementById("input")
-    const output = document.getElementById("output")
     const edited = document.getElementById("edited")
 
-    // function download(text) {
-    //     var filename = prompt('File name:');
-    //     if (!filename)
-    //         return;
-    //     if (!filename.endsWith('.txt'))
-    //         filename = filename.concat('.txt');
-    //
-    //     var element = document.createElement('a');
-    //     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    //     element.setAttribute('download', filename);
-    //
-    //     element.style.display = 'none';
-    //     document.body.appendChild(element);
-    //
-    //     element.click();
-    //
-    //     document.body.removeChild(element);
-    // }
     function copyText(text) {
         /* Select the text field */
         const elem = document.createElement('textarea');
@@ -76,11 +52,11 @@
         document.execCommand('copy');
         document.body.removeChild(elem);
         alert("Copied the text");
-}
+    }
 
     function send(file) {
         input.innerText = "";
-        output.innerText = "";
+        edited.innerText = "";
         const size = file.size / 1000;
         const seconds = size * 1.8;
         const minutes = seconds / 60;
@@ -95,7 +71,6 @@
         .then(response => (response.ok ? response.json() : {"en": response.statusText, "he": "שגיאה"}))
         .then(texts => {
             if ("en" in texts)
-                output.innerText = texts["en"];
                 edited.innerText = texts["en"];
             if ("he" in texts)
                 input.innerText = texts["he"];
@@ -110,10 +85,6 @@
         send(load.files[0]);
     });
 
-    // save.addEventListener('click', (event) => {
-    //     const text = document.querySelector('.editable');
-    //     download(text.innerText);
-    // });
     copy.addEventListener('click', (event) => {
         const text = document.querySelector('.editable');
         copyText(text.innerText);
