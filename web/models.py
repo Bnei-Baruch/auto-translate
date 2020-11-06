@@ -1,15 +1,17 @@
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from zohar_preprocess_file import *
 from zohar_split_heuristic import *
-import os
 import gdown
 from zipfile import ZipFile
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-from fairseq.models.transformer import TransformerModel
 import torch
 import numpy as np
 import shutil
 from time import time
 from tqdm import trange
+# from fairseq.models.transformer import TransformerModel
 
 
 def process(content, lang='he'):
@@ -58,32 +60,32 @@ class TranslationModel:
                     zipf.extractall()
                 shutil.move('content/model', 'hf_model')
                 shutil.rmtree('content')
-            mname = 'model'
+            mname = 'hf_model'
             self.torch_device = 'cpu'
             self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
             self.trained_tok = AutoTokenizer.from_pretrained(mname)
-        elif self.backend == 'fairseq':
-            if not os.path.exists('fairseq_model'):
-                url = 'https://drive.google.com/u/0/uc?id=1seEou8d0SrzjQ133YZsh5TMNZIy7EBPX&export=download'
-                output = 'fairseq_model.zip'
-                gdown.download(url, output, quiet=False)
-                with ZipFile('fairseq_model.zip', 'r') as zipf:
-                    zipf.extractall()
-                # shutil.move('content/model', 'fairseq_model')
-                # shutil.rmtree('content')
-            if not os.path.exists('he_dict'):
-                url = 'https://drive.google.com/u/0/uc?id=1z_Efnsf_zS3g1cgRLYLRYSCwKHg8qTxA&export=download'
-                output = 'he_dict'
-                gdown.download(url, output, quiet=False)
-            mname = 'checkpoint_best.pt'
-            he2en = TransformerModel.from_pretrained(
-                '.',
-                checkpoint_file=mname,
-                data_name_or_path='.',
-                bpe='fastbpe',
-                bpe_codes='fairseq_codes'
-            )
-            self.trained_model = he2en
+        # elif self.backend == 'fairseq':
+        #     if not os.path.exists('fairseq_model'):
+        #         url = 'https://drive.google.com/u/0/uc?id=1seEou8d0SrzjQ133YZsh5TMNZIy7EBPX&export=download'
+        #         output = 'fairseq_model.zip'
+        #         gdown.download(url, output, quiet=False)
+        #         with ZipFile('fairseq_model.zip', 'r') as zipf:
+        #             zipf.extractall()
+        #         # shutil.move('content/model', 'fairseq_model')
+        #         # shutil.rmtree('content')
+        #     if not os.path.exists('he_dict'):
+        #         url = 'https://drive.google.com/u/0/uc?id=1z_Efnsf_zS3g1cgRLYLRYSCwKHg8qTxA&export=download'
+        #         output = 'he_dict'
+        #         gdown.download(url, output, quiet=False)
+        #     mname = 'checkpoint_best.pt'
+        #     he2en = TransformerModel.from_pretrained(
+        #         '.',
+        #         checkpoint_file=mname,
+        #         data_name_or_path='.',
+        #         bpe='fastbpe',
+        #         bpe_codes='fairseq_codes'
+        #     )
+        #     self.trained_model = he2en
 
     def get_translated_text(self, text):
         text = [t for t in text if t]
@@ -94,8 +96,8 @@ class TranslationModel:
             assert len(trained_batch['input_ids'][0]) < 512, 'Tokenized batch too long!'
             trained_translated = self.trained_model.generate(**trained_batch, num_beams=1, early_stopping=False)
             trained_translated_txt = self.trained_tok.batch_decode(trained_translated, skip_special_tokens=True)
-        elif self.backend == 'fairseq':
-            trained_translated_txt = self.trained_model.translate(text)
+        # elif self.backend == 'fairseq':
+        #     trained_translated_txt = self.trained_model.translate(text)
         return trained_translated_txt
 
     def translate(self, s):
