@@ -48,15 +48,16 @@ function unblockInput(){
 
 function setCPU(percent){
 
-    var color = 'green';
+    var color = '#9ACD32';
     if(percent>70){
         color = 'red';
     } else if(percent>30){
-        color = 'yellow';
+        color = 'gold';
     }
 
     var cpu = document.getElementById("cpu");
     cpu.style.setProperty("display", 'block');
+    cpu.style.borderColor =color;
 
     var cpuSpan = document.getElementById("cpu-span");
     cpuSpan.innerHTML = percent + '%';

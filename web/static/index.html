@@ -95,7 +95,7 @@
                         console.error('Error:', error);
                     });
                     i+=2;
-            }, 1000)
+            }, 500)
 
             blockInput();
 
@@ -103,7 +103,8 @@
                 .then(response => {
                     unblockInput();
                     clearInterval(interval);
-                    hideProgress();
+                    setTimeout(()=>hideProgress(), 0);
+                    
                     return response.ok ? response.json() : {
                         "en": response.statusText,
                         "he": "שגיאה"
@@ -119,7 +120,7 @@
                 .catch(error => {
                     unblockInput();
                     clearInterval(interval);
-                    hideProgress();                    
+                    setTimeout(()=>hideProgress(), 0);                  
                     console.error('Error:', error);
                 });
         }

@@ -168,5 +168,7 @@ margin-right: 30px;
 top: 45px;
 padding: 20px;
 font-size: 30px;
-font-weight: 700;
+font-weight: 500;
+border: 1px black solid;
+min-width: 200px;
 }
