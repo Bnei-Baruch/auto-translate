@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Zohar Translate</title>
     <meta charset="UTF-8">
@@ -10,97 +11,118 @@
 
 <body>
 
-<h1 class="title">Zohar Translate</h1>
+    <h1 class="title">Zohar Translate</h1>
 
-<div class="container">
+    <div class="container">
 
-    <span class="menu"><span id="copy" class="menu button">Copy Output</span></span>
+        <span class="menu"><span id="copy" class="menu button">Copy Output</span></span>
 
-    <span class="menu"><span id="save-as-table" class="menu button">Save as a Table</span></span>
+        <span class="menu"><span id="save-as-table" class="menu button">Save as a Table</span></span>
 
-    <span class="menu">
-        <span class="microphone" disabled="true">🎙</span>
-        <audio class="audio" controls="true" disabled="true"></audio>
-    </span>
+        <span class="menu">
+            <span class="microphone" disabled="true">🎙</span>
+            <audio class="audio" controls="true" disabled="true"></audio>
+        </span>
 
-    <span class="menu">
-        <label for="load"><span class="menu button">Load from a File</span></label>
-        <input type="file" id="load" />
-    </span>
+        <span class="menu">
+            <label for="load"><span class="menu button">Load from a File</span></label>
+            <input type="file" id="load" />
+        </span>
 
-    <span class="menu">
+        <span class="menu">
 
-        <span id="send-text-for-translation" class="menu button">Send Text</span>
-    </span>
+            <span id="send-text-for-translation" class="menu button">Send Text</span>
+        </span>
 
-</div>
+    </div>
 
-<div class="container">
+    <div class="container">
 
-<span contenteditable="true" class="editable text" id="edited">
-</span>
+        <span contenteditable="true" class="editable text" id="edited">
+        </span>
 
-<span class="hebrew text" id="input">
-</span>
+        <span contenteditable="true" class="hebrew text" id="input">
+        </span>
 
-</div>
+    </div>
 
-<script type="text/javascript" src="dictaphone.js"></script>
-<script type="text/javascript">
-    const load = document.getElementById("load");
-    const copy = document.getElementById("copy");
 
-    const input = document.getElementById("input")
-    const edited = document.getElementById("edited")
+    <div id="progress"><span></span></div>
 
-    function copyText(text) {
-        /* Select the text field */
-        const elem = document.createElement('textarea');
-        elem.value = text;
-        document.body.appendChild(elem);
-        elem.select();
-        document.execCommand('copy');
-        document.body.removeChild(elem);
-    }
+    <script type="text/javascript" src="dictaphone.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript">
+        const load = document.getElementById("load");
+        const copy = document.getElementById("copy");
 
-    function send(file) {
-        input.innerText = "";
-        edited.innerText = "";
-        const size = file.size / 1000;
-        const seconds = size * 8;
-        const minutes = seconds / 60;
-        const show_minutes = minutes;
-        const show_seconds = seconds / 3;
-        if (minutes >= 1)
-            alert("Translation will take approximately: " + show_minutes.toFixed(1) + " minutes.");
-        if (minutes < 1)
-            alert("Translation will take approximately: " + show_seconds.toFixed(1) + " seconds.");
-        fetch('/', {
-            method: 'PUT',
-            body: file
-        })
-        .then(response => (response.ok ? response.json() : {"en": response.statusText, "he": "שגיאה"}))
-        .then(texts => {
-            if ("en" in texts)
-                edited.innerText = texts["en"];
-            if ("he" in texts)
-                input.innerText = texts["he"];
-            edited.focus();
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        const input = document.getElementById("input")
+        const edited = document.getElementById("edited")
+
+        function copyText(text) {
+            /* Select the text field */
+            const elem = document.createElement('textarea');
+            elem.value = text;
+            document.body.appendChild(elem);
+            elem.select();
+            document.execCommand('copy');
+            document.body.removeChild(elem);
+        }
+
+        function send(file) {
+            input.innerText = "";
+            edited.innerText = "";
+            // const size = file.size / 1000;
+            // const seconds = size * 8;
+            // const minutes = seconds / 60;
+            // const show_minutes = minutes;
+            // const show_seconds = seconds / 3;
+
+            // if (minutes >= 1)
+            //     alert("Translation will take approximately: " + show_minutes.toFixed(1) + " minutes.");
+            // if (minutes < 1)
+            //     alert("Translation will take approximately: " + show_seconds.toFixed(1) + " seconds.");
+
+            var i = 0;
+            var interval = setInterval(() => {
+                showProgress(i);
+                i++;
+            }, 500)
+
+            fetch('/', {
+                    method: 'PUT',
+                    body: file
+                })
+                .then(response => {
+                    hideProgress();
+                    clearInterval(interval);
+                    return response.ok ? response.json() : {
+                        "en": response.statusText,
+                        "he": "שגיאה"
+                    }
+                })
+                .then(texts => {
+                    if ("en" in texts)
+                        edited.innerText = texts["en"];
+                    if ("he" in texts)
+                        input.innerText = texts["he"];
+                    edited.focus();
+                })
+                .catch(error => {
+                    hideProgress();
+                    clearInterval(interval);
+                    console.error('Error:', error);
+                });
+        }
+
+        load.addEventListener('change', (event) => {
+            send(load.files[0]);
         });
-    }
 
-    load.addEventListener('change', (event) => {
-        send(load.files[0]);
-    });
-
-    copy.addEventListener('click', (event) => {
-        const text = document.querySelector('.editable');
-        copyText(text.innerText);
-    });
-</script>
+        copy.addEventListener('click', (event) => {
+            const text = document.querySelector('.editable');
+            copyText(text.innerText);
+        });
+    </script>
 </body>
 
 </html>
