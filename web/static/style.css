@@ -112,8 +112,8 @@ p, h2, h3 {
     font-size: 50pt;
 }
 
-span.menu {
-    width: 45%;
+span.menu, button.menu {
+    width: 50%;
 }
 
 a.menu {
@@ -152,4 +152,11 @@ span.microphone:hover {
   font-weight: 800;
   font-size: 26px;
   /* position: absolute; */
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
 }

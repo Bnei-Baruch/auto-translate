@@ -15,9 +15,9 @@
 
     <div class="container">
 
-        <span class="menu"><span id="copy" class="menu button">Copy Output</span></span>
+        <span class="menu"><button id="copy" class="menu button">Copy Output</button></span>
 
-        <span class="menu"><span id="save-as-table" class="menu button">Save as a Table</span></span>
+        <span class="menu"><button id="save-as-table" class="menu button">Save as a Table</button></span>
 
         <span class="menu">
             <span class="microphone" disabled="true">🎙</span>
@@ -25,13 +25,12 @@
         </span>
 
         <span class="menu">
-            <label for="load"><span class="menu button">Load from a File</span></label>
+            <button class="menu button" id="fileload-btn">Load from a File</button>
             <input type="file" id="load" />
         </span>
 
         <span class="menu">
-
-            <span id="send-text-for-translation" class="menu button">Send Text</span>
+            <button id="send-text-for-translation" class="menu button">Send Text</button>
         </span>
 
     </div>
@@ -88,11 +87,14 @@
                 i++;
             }, 500)
 
+            blockInput();
+
             fetch('/', {
                     method: 'PUT',
                     body: file
                 })
                 .then(response => {
+                    unblockInput();
                     hideProgress();
                     clearInterval(interval);
                     return response.ok ? response.json() : {
@@ -108,11 +110,17 @@
                     edited.focus();
                 })
                 .catch(error => {
+                    unblockInput();
                     hideProgress();
                     clearInterval(interval);
                     console.error('Error:', error);
                 });
         }
+
+        document.getElementById('fileload-btn')
+        .addEventListener('click', (event) => {
+            load.click();
+        });
 
         load.addEventListener('change', (event) => {
             send(load.files[0]);

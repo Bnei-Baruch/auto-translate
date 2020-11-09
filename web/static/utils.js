@@ -20,3 +20,24 @@ function hideProgress(){
     span.innerHTML = null;
 }
 
+function blockInput(){
+
+    var fromFileBtn = document.getElementById("fileload-btn");
+    fromFileBtn.disabled = true;
+
+    var sendFromTextBtn = document.getElementById("send-text-for-translation");
+    sendFromTextBtn.disabled = true;
+
+}
+
+function unblockInput(){
+
+    var fromFileBtn = document.getElementById("fileload-btn");
+    fromFileBtn.disabled = false;
+
+    var sendFromTextBtn = document.getElementById("send-text-for-translation");
+    sendFromTextBtn.disabled = false;
+
+}
+
+
