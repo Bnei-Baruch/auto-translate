@@ -1,9 +1,10 @@
 @font-face {
-  font-family: 'Stam';
-  src: url('StamSefaradCLM.ttf') format('truetype');
+    font-family: 'Stam';
+    src: url('StamSefaradCLM.ttf') format('truetype');
 }
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
 }
@@ -37,7 +38,7 @@ svg.header {
 .text {
     border-radius: 3px;
     width: 45%;
-    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
     background: white;
     padding: 1em;
     color: #2c3e50;
@@ -48,13 +49,16 @@ h1 {
     text-align: center;
 }
 
-p, ul.text {
+p,
+ul.text {
     font-family: sans-serif;
     line-height: 1.3em;
     font-size: 14pt;
 }
 
-p, h2, h3 {
+p,
+h2,
+h3 {
     padding-left: 28pt;
     padding-right: 28pt;
 }
@@ -88,6 +92,7 @@ p, h2, h3 {
     text-decoration: none;
     font-family: 'Stam' !important;
 }
+
 .button:hover,
 .button:focus {
     border: 1px solid #fae9bb;
@@ -98,6 +103,7 @@ p, h2, h3 {
     color: #111111;
     text-decoration: none;
 }
+
 .button:active {
     background: #afa383;
     background: -webkit-gradient(linear, left top, left bottom, from(#afa383), to(#afa383));
@@ -112,7 +118,8 @@ p, h2, h3 {
     font-size: 50pt;
 }
 
-span.menu, button.menu {
+span.menu,
+button.menu {
     width: 50%;
 }
 
@@ -135,40 +142,52 @@ span.microphone:hover {
     display: none;
 }
 
-#progress {
-    --fill: 0%;
-    background: linear-gradient(to left,#d2c49d var(--fill),transparent 0);
-    position: fixed;
-    width: 100%;
+.progress-container {
+    padding: 0 44px;
+}
+
+.progress {
+    background-color: rgba(0, 0, 0, .3);
     height: 30px;
-    top:0px;
+    width: inherit;
+    direction: rtl;
+    display: none;
+}
+
+.progress .inner-progress {
+    background: repeating-linear-gradient(45deg,
+            white,
+            white 10px,
+            #d2c49d 10px,
+            #d2c49d 20px);
+    height: inherit;
     z-index: 100;
 }
 
-#progress span{
-  color: black;
-  z-index: 100;
-  line-height: 30px;
-  font-weight: 800;
-  font-size: 26px;
-  /* position: absolute; */
+#progress span {
+    color: black;
+    z-index: 100;
+    line-height: 30px;
+    font-weight: 800;
+    font-size: 26px;
+    /* position: absolute; */
 }
 
 button:disabled,
-button[disabled]{
-  border: 1px solid #999999;
-  background-color: #cccccc;
-  color: #666666;
+button[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc;
+    color: #666666;
 }
 
-#cpu{
-position: fixed;
-right: 0;
-margin-right: 30px;
-top: 45px;
-padding: 20px;
-font-size: 30px;
-font-weight: 500;
-border: 1px black solid;
-min-width: 200px;
+#cpu {
+    position: fixed;
+    right: 0;
+    margin-right: 30px;
+    top: 45px;
+    padding: 20px;
+    font-size: 30px;
+    font-weight: 500;
+    border: 1px black solid;
+    min-width: 200px;
 }
