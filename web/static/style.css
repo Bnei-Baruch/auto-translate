@@ -156,8 +156,8 @@ span.microphone:hover {
 
 .progress .inner-progress {
     background: repeating-linear-gradient(45deg,
-            white,
-            white 10px,
+            #afa383,
+            #afa383 10px,
             #d2c49d 10px,
             #d2c49d 20px);
     height: inherit;
@@ -178,6 +178,7 @@ button[disabled] {
     border: 1px solid #999999;
     background-color: #cccccc;
     color: #666666;
+    cursor: default;
 }
 
 #cpu {
