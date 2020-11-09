@@ -50,6 +50,8 @@
 
     <script type="text/javascript" src="dictaphone.js"></script>
     <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript" src="server-actions.js"></script>
+
     <script type="text/javascript">
         const load = document.getElementById("load");
         const copy = document.getElementById("copy");
@@ -70,33 +72,33 @@
         function send(file) {
             input.innerText = "";
             edited.innerText = "";
-            // const size = file.size / 1000;
-            // const seconds = size * 8;
-            // const minutes = seconds / 60;
-            // const show_minutes = minutes;
-            // const show_seconds = seconds / 3;
 
-            // if (minutes >= 1)
-            //     alert("Translation will take approximately: " + show_minutes.toFixed(1) + " minutes.");
-            // if (minutes < 1)
-            //     alert("Translation will take approximately: " + show_seconds.toFixed(1) + " seconds.");
-
-            var i = 0;
+            var i = 1;
             var interval = setInterval(() => {
-                showProgress(i);
-                i++;
-            }, 500)
+                callCPUUsageInPercents()
+                    .then(response => {
+                        console.error(response);
+                        if (response.ok) {
+                            var percent = (+response.json()) * 100;
+                            showProgress(percent);
+                        } else {
+                            console.error(response);
+                            showProgress(i);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    i+=2;
+            }, 1000)
 
             blockInput();
 
-            fetch('/', {
-                    method: 'PUT',
-                    body: file
-                })
+            callFileProcessing(file)
                 .then(response => {
                     unblockInput();
-                    hideProgress();
                     clearInterval(interval);
+                    hideProgress();
                     return response.ok ? response.json() : {
                         "en": response.statusText,
                         "he": "שגיאה"
@@ -111,16 +113,16 @@
                 })
                 .catch(error => {
                     unblockInput();
-                    hideProgress();
                     clearInterval(interval);
+                    hideProgress();                    
                     console.error('Error:', error);
                 });
         }
 
         document.getElementById('fileload-btn')
-        .addEventListener('click', (event) => {
-            load.click();
-        });
+            .addEventListener('click', (event) => {
+                load.click();
+            });
 
         load.addEventListener('change', (event) => {
             send(load.files[0]);
