@@ -28,6 +28,9 @@ function blockInput(){
     var sendFromTextBtn = document.getElementById("send-text-for-translation");
     sendFromTextBtn.disabled = true;
 
+    var input = document.getElementById("input");
+    input.setAttribute("contenteditable", false);
+
 }
 
 function unblockInput(){
@@ -38,6 +41,26 @@ function unblockInput(){
     var sendFromTextBtn = document.getElementById("send-text-for-translation");
     sendFromTextBtn.disabled = false;
 
+    var input = document.getElementById("input");
+    input.setAttribute("contenteditable", true);
+
+}
+
+function setCPU(percent){
+
+    var color = 'green';
+    if(percent>70){
+        color = 'red';
+    } else if(percent>30){
+        color = 'yellow';
+    }
+
+    var cpu = document.getElementById("cpu");
+    cpu.style.setProperty("display", 'block');
+
+    var cpuSpan = document.getElementById("cpu-span");
+    cpuSpan.innerHTML = percent + '%';
+    cpu.style.setProperty("color", color);
 }
 
 

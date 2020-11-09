@@ -160,3 +160,13 @@ button[disabled]{
   background-color: #cccccc;
   color: #666666;
 }
+
+#cpu{
+position: fixed;
+right: 0;
+margin-right: 30px;
+top: 45px;
+padding: 20px;
+font-size: 30px;
+font-weight: 700;
+}

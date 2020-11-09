@@ -48,6 +48,10 @@
 
     <div id="progress"><span></span></div>
 
+    <div id="cpu" style="display: none">
+       CPU: <span id="cpu-span"></span>
+    </div>
+
     <script type="text/javascript" src="dictaphone.js"></script>
     <script type="text/javascript" src="utils.js"></script>
     <script type="text/javascript" src="server-actions.js"></script>
@@ -56,8 +60,9 @@
         const load = document.getElementById("load");
         const copy = document.getElementById("copy");
 
-        const input = document.getElementById("input")
-        const edited = document.getElementById("edited")
+        const input = document.getElementById("input");
+        const edited = document.getElementById("edited");
+        const sendTextBtn = document.getElementById("send-text-for-translation");
 
         function copyText(text) {
             /* Select the text field */
@@ -69,13 +74,13 @@
             document.body.removeChild(elem);
         }
 
-        function send(file) {
+        function send(file, text) {
             input.innerText = "";
             edited.innerText = "";
 
             var i = 1;
             var interval = setInterval(() => {
-                callCPUUsageInPercents()
+                callProgressInPercents()
                     .then(response => {
                         console.error(response);
                         if (response.ok) {
@@ -119,6 +124,57 @@
                 });
         }
 
+        function sendText(text) {
+            edited.innerText = "";
+
+            var i = 1;
+            var interval = setInterval(() => {
+                callProgressInPercents()
+                    .then(response => {
+                        console.error(response);
+                        if (response.ok) {
+                            var percent = (+response.json()) * 100;
+                            showProgress(percent);
+                        } else {
+                            console.error(response);
+                            showProgress(i);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    i+=2;
+            }, 1000)
+
+            blockInput();
+
+            callTextProcessing(text)
+                .then(response => {
+                    unblockInput();
+                    clearInterval(interval);
+                    hideProgress();
+                    return response.ok ? response.json() : {
+                        "en": response.statusText,
+                        "he": "שגיאה"
+                    }
+                })
+                .then(texts => {
+                    if ("en" in texts)
+                        edited.innerText = texts["en"];
+                    if ("he" in texts)
+                        input.innerText = texts["he"];
+                    edited.focus();
+                })
+                .catch(error => {
+                    unblockInput();
+                    clearInterval(interval);
+                    hideProgress();                    
+                    console.error('Error:', error);
+                });
+        }
+
+        
+
         document.getElementById('fileload-btn')
             .addEventListener('click', (event) => {
                 load.click();
@@ -132,6 +188,28 @@
             const text = document.querySelector('.editable');
             copyText(text.innerText);
         });
+
+        sendTextBtn.addEventListener('click', (event) => {
+            const text = input.textContent;
+            sendText(text);
+        });
+
+        setInterval(() => {
+                callCPUUsageInPercents()
+                    .then(response => {
+                        if (response.ok) {
+                            var percent = (+response.json()) * 100;
+                            setCPU(percent);
+                        } else {
+                            console.error(response);
+                            setCPU(Math.floor(Math.random() * Math.floor(100)));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }, 1000)
+
     </script>
 </body>
 

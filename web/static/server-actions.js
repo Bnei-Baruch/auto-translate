@@ -4,6 +4,12 @@ function callCPUUsageInPercents(){
     });
 }
 
+function callProgressInPercents(){
+    return fetch('/progress', {
+        method: 'GET'
+    });
+}
+
 function callFileProcessing(file){
     return fetch('/', {
         method: 'PUT',
