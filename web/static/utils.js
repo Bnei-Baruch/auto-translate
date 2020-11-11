@@ -1,6 +1,5 @@
-
-function showProgress(percent){
-    percent = percent>100?100: percent;
+function showProgress(percent) {
+    percent = percent > 100 ? 100 : percent;
     var scrollPercent = percent + "%";
     var element = document.getElementsByClassName("progress")[0];
     element.style.setProperty("display", 'block');
@@ -12,14 +11,14 @@ function showProgress(percent){
     span.innerHTML = scrollPercent;
 }
 
-function hideProgress(){
+function hideProgress() {
     var element = document.getElementsByClassName("progress")[0];
     element.style.setProperty("display", 'none');
     var span = element.getElementsByTagName("span")[0];
     span.innerHTML = null;
 }
 
-function blockInput(){
+function blockInput() {
 
     var fromFileBtn = document.getElementById("fileload-btn");
     fromFileBtn.disabled = true;
@@ -32,7 +31,7 @@ function blockInput(){
 
 }
 
-function unblockInput(){
+function unblockInput() {
 
     var fromFileBtn = document.getElementById("fileload-btn");
     fromFileBtn.disabled = false;
@@ -45,22 +44,30 @@ function unblockInput(){
 
 }
 
-function setCPU(percent){
+function setCPU(percent) {
 
     var color = '#9ACD32';
-    if(percent>70){
+    if (percent > 70) {
         color = 'red';
-    } else if(percent>30){
+    } else if (percent > 30) {
         color = 'gold';
     }
 
     var cpu = document.getElementById("cpu");
     cpu.style.setProperty("display", 'block');
-    cpu.style.borderColor =color;
+    cpu.style.borderColor = color;
 
     var cpuSpan = document.getElementById("cpu-span");
     cpuSpan.innerHTML = percent + '%';
     cpu.style.setProperty("color", color);
 }
 
+function getSelectedTranslateModel() {
+    var select = document.getElementById('model-select');
+    var selected = select.options[select.selectedIndex];
+    return selected.value;
+}
 
+function getTimestamp(){
+    return new Date().getTime();
+}

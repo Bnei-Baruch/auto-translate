@@ -118,10 +118,6 @@ h3 {
     font-size: 50pt;
 }
 
-span.menu,
-button.menu {
-    width: 50%;
-}
 
 a.menu {
     font-family: 'Stam';
@@ -182,7 +178,7 @@ button[disabled] {
 }
 
 #cpu {
-    position: fixed;
+    position: absolute;
     right: 0;
     margin-right: 30px;
     top: 45px;
@@ -191,4 +187,23 @@ button[disabled] {
     font-weight: 500;
     border: 1px black solid;
     min-width: 200px;
+}
+
+.model-select {
+    position: absolute;
+    left: 0;
+    margin-left: 30px;
+    top: 45px;
+    padding: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    min-width: 200px;
+    color: #d2c49d;
+    border: 1px #d2c49d solid;
+}
+
+.model-select select{
+    width: 100%;
+    font-size: 16px;
+    margin-top: 3px;
 }

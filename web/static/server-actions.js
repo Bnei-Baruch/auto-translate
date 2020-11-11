@@ -1,30 +1,28 @@
-function callCPUUsageInPercents(){
-   return fetch('/cpu', {
+function callCPUUsageInPercents() {
+    return fetch(`/cpu`, {
         method: 'GET'
     });
 }
 
-function callProgressInPercents(){
-    return fetch('/progress', {
+function callProgressInPercents(timestamp) {
+    return fetch(`/progress?timestamp=${timestamp}`, {
         method: 'GET'
     });
 }
 
-function callFileProcessing(file){
-    return fetch('/', {
+function callFileProcessing(file, timestamp, model) {
+    return fetch(`/file?timestamp=${timestamp}&model=${model}`, {
         method: 'PUT',
         body: file
     });
 }
 
-function callTextProcessing(text){
-    return fetch('/text', {
+function callTextProcessing(text, timestamp, model) {
+
+    return fetch(`/text?timestamp=${timestamp}&model=${model}`, {
         method: 'POST',
         body: {
-            text: text,
-            sourceLang: 'he',
-            destinationLang: 'en',
-            version: 'some string'
+            text: text
         },
         headers: {
             'Content-Type': 'application/json'
@@ -32,18 +30,21 @@ function callTextProcessing(text){
     });
 }
 
-function callSaveAsTable(textInput, textOutput){
-    return fetch('/save-as-table', {
+function callSaveAsTable(textInput, textOutput, model) {
+    return fetch(`/save-as-table?timestamp=${timestamp}&model=${model}`, {
         method: 'POST',
         body: {
             textInput: textInput,
-            textOutput: textOutput,
-            sourceLang: 'he',
-            destinationLang: 'en',
-            version: 'some string'
+            textOutput: textOutput
         },
         headers: {
             'Content-Type': 'application/json'
         },
+    });
+}
+
+function callGetTranslateModels() {
+    return fetch('/translate-models', {
+        method: 'GET'
     });
 }

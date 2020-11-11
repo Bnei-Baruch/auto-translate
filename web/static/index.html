@@ -13,16 +13,12 @@
 
     <h1 class="title">Zohar Translate</h1>
 
+    <div class="menu model-select">
+        <div>Select translate model</div>
+        <select name="select" id="model-select"> </select>
+    </div>
+
     <div class="container">
-
-        <span class="menu"><button id="copy" class="menu button">Copy Output</button></span>
-
-        <span class="menu"><button id="save-as-table" class="menu button">Save as a Table</button></span>
-
-        <span class="menu">
-            <span class="microphone" disabled="true">🎙</span>
-            <audio class="audio" controls="true" disabled="true"></audio>
-        </span>
 
         <span class="menu">
             <button class="menu button" id="fileload-btn">Load from a File</button>
@@ -33,15 +29,24 @@
             <button id="send-text-for-translation" class="menu button">Send Text</button>
         </span>
 
+        <span class="menu">
+            <span class="microphone" disabled="true">🎙</span>
+            <audio class="audio" controls="true" disabled="true"></audio>
+        </span>
+
+        <span class="menu"><button id="copy" class="menu button">Copy Output</button></span>
+
+        <span class="menu"><button id="save-as-table" class="menu button">Save as a Table</button></span>
+
 
     </div>
 
     <div class="container">
 
-        <span contenteditable="true" class="editable text" id="edited">
+        <span contenteditable="true" class="hebrew text" id="input">
         </span>
 
-        <span contenteditable="true" class="hebrew text" id="input">
+        <span contenteditable="true" class="editable text" id="edited">
         </span>
 
     </div>
@@ -56,9 +61,11 @@
         CPU: <span id="cpu-span"></span>
     </div>
 
+    <!-- order is vital here! -->
     <script type="text/javascript" src="dictaphone.js"></script>
     <script type="text/javascript" src="utils.js"></script>
     <script type="text/javascript" src="server-actions-mock.js"></script>
+    <script type="text/javascript" src="default-actions.js"></script>
 
     <script type="text/javascript">
         const load = document.getElementById("load");
@@ -78,16 +85,11 @@
             document.body.removeChild(elem);
         }
 
-        function send(file, text) {
-            input.innerText = "";
-            edited.innerText = "";
-            load.value = '';
-
+        function setupProgressInterval(timestamp){
             var i = 1;
             var interval = setInterval(() => {
-                callProgressInPercents(null, i)
+                callProgressInPercents(timestamp, i)
                     .then(response => {
-                        console.error(response);
                         if (response.ok) {
                             var percent = +response.json().progress;
                             showProgress(percent);
@@ -101,9 +103,21 @@
                 i += 2;
             }, 500)
 
-            blockInput();
+            return interval;
+        }
 
-            callFileProcessing(file)
+        function send(file, text) {
+            input.innerText = "";
+            edited.innerText = "";
+            load.value = '';
+
+            var timestamp = getTimestamp();
+            var model = getSelectedTranslateModel();
+           
+            blockInput();
+            var interval = setupProgressInterval(timestamp);
+
+            callFileProcessing(file, timestamp, model)
                 .then(response => {
                     unblockInput();
                     clearInterval(interval);
@@ -132,42 +146,25 @@
         function sendText(text) {
             edited.innerText = "";
 
-            var i = 1;
-            var interval = setInterval(() => {
-                callProgressInPercents(null, i)
-                    .then(response => {
-                        console.error(response);
-                        if (response.ok) {
-                            var percent = +response.json().progress;
-                            showProgress(percent);
-                        } else {
-                            console.error(response);
-                            showProgress(i);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-                i += 2;
-            }, 1000)
+            var timestamp = getTimestamp();
+            var model = getSelectedTranslateModel();
 
             blockInput();
+            var interval = setupProgressInterval(timestamp);
 
-            callTextProcessing(text)
+            callTextProcessing(text, timestamp, model)
                 .then(response => {
                     unblockInput();
                     clearInterval(interval);
                     hideProgress();
                     return response.ok ? response.json() : {
-                        "en": response.statusText,
-                        "he": "שגיאה"
+                        translatedText: response.statusText,
+                        sourceText: "שגיאה"
                     }
                 })
                 .then(texts => {
-                    if ("en" in texts)
-                        edited.innerText = texts["en"];
-                    if ("he" in texts)
-                        input.innerText = texts["he"];
+                    edited.innerText = texts.translatedText;
+                    input.innerText = texts.sourceText;
                     edited.focus();
                 })
                 .catch(error => {
@@ -177,8 +174,6 @@
                     console.error('Error:', error);
                 });
         }
-
-
 
         document.getElementById('fileload-btn')
             .addEventListener('click', (event) => {
@@ -199,20 +194,7 @@
             sendText(text);
         });
 
-        setInterval(() => {
-            callCPUUsageInPercents()
-                .then(response => {
-                    if (response.ok) {
-                        var percent = +response.json().cpu;
-                        setCPU(percent);
-                    } else {
-                        console.error(response);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }, 1000)
+        
     </script>
 </body>
 
