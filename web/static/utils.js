@@ -63,11 +63,106 @@ function setCPU(percent) {
 }
 
 function getSelectedTranslateModel() {
-    var select = document.getElementById('model-select');
-    var selected = select.options[select.selectedIndex];
-    return selected.value;
+
+    var srcLangSelect = document.getElementById('select-src-lg');
+    var selectedSrcLang = getSelectValue(srcLangSelect);
+
+    var destLangSelect = document.getElementById('select-dest-lg');
+    var selectedDestLang = getSelectValue(destLangSelect);
+
+    var styleSelect = document.getElementById('select-style');
+    var selectedStyle = getSelectValue(styleSelect);
+
+    var selectVersion = document.getElementById('select-version');
+    var selectedVersion = getSelectValue(selectVersion);
+
+    return `${selectedSrcLang}_${selectedDestLang}_${selectedStyle}_${selectedVersion}_nov-5-20`
+
 }
 
-function getTimestamp(){
+function getTimestamp() {
     return new Date().getTime();
 }
+
+function getSelectValue(select) {
+
+    if (select.selectedIndex < 0) {
+        return null;
+    }
+
+    var selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption) {
+        return null;
+    }
+
+    return selectedOption.value;
+}
+
+function modelSelectChanged() {
+
+    var models = window.translateModels;
+    if (!(models && models.length))
+        return;
+
+    var srcLangSelect = document.getElementById('select-src-lg');
+    var selectedSrcLang = getSelectValue(srcLangSelect);
+
+    srcLangSelect.innerHTML = models
+        .map(el => el.srcLang)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .map((element, i) => {
+            var selected = selectedSrcLang == element ? 'selected' : '';
+            return `<option value="${element}" ${selected}>${element}</option>`;
+        }).join("");
+
+    if (selectedSrcLang !== null) {
+        models = models.filter(m => m.srcLang === getSelectValue(srcLangSelect));
+    }
+
+    var destLangSelect = document.getElementById('select-dest-lg');
+    var selectedDestLang = getSelectValue(destLangSelect);
+
+    destLangSelect.innerHTML = models
+        .map(el => el.destLang)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .map((element, i) => {
+            var selected = selectedDestLang == element ? 'selected' : '';
+            return `<option value="${element}" ${selected}>${element}</option>`;
+        }).join("");
+
+    if (selectedDestLang !== null) {
+        models = models.filter(m => m.destLang === getSelectValue(destLangSelect));
+    }
+
+    var styleSelect = document.getElementById('select-style');
+    var selectedStyle = getSelectValue(styleSelect);
+
+    styleSelect.innerHTML = models
+        .map(el => el.style)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .map((element, i) => {
+            var selected = selectedStyle == element ? 'selected' : '';
+            return `<option value="${element}" ${selected}>${element}</option>`;
+        }).join("");
+
+    if (selectedStyle !== null) {
+        models = models.filter(m => m.style === getSelectValue(styleSelect));
+    }
+
+    var selectVersion = document.getElementById('select-version');
+    var selectedVersion = getSelectValue(selectVersion);
+
+    selectVersion.innerHTML = models
+    .map(el => el.version)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .map((element, i) => {
+        var selected = selectVersion == element ? 'selected' : '';
+        return `<option value="${element}" ${selected}>${element}</option>`;
+    }).join("");
+
+    if (selectedVersion !== null) {
+        models = models.filter(m => m.version === getSelectValue(selectVersion));
+    }
+
+}
+

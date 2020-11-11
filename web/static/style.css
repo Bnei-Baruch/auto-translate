@@ -202,8 +202,28 @@ button[disabled] {
     border: 1px #d2c49d solid;
 }
 
-.model-select select{
+.model-select select {
     width: 100%;
     font-size: 16px;
     margin-top: 3px;
+}
+
+.select-container {
+    border: 1px #d2c49d solid;
+    margin-right: auto;
+    margin-left: auto;
+    padding:10px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.inline-select {
+    display: inline-block;
+    max-width: 100px;
+}
+
+.inline-select select {
+    min-width: 50px;
+    width: 100%;
+    font-size: 16px;
 }

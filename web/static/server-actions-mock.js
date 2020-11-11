@@ -74,8 +74,11 @@ function callGetTranslateModels() {
                     return {
                         models: [
                             'he_en_zohar_V17_nov-5-20',
-                            'he_en_zohar_V09_apr-5-19',
-                            'he_es_zohar_V05_oct-13-20'
+                            'it_en_zohar_V09_apr-5-19',
+                            'he_es_zohar_V05_oct-13-20',
+                            'de_en_non-zohar_V09_nov-5-20',
+                            'it_sk_non-zohar_V09_apr-5-19',
+                            'he_uk_zohar_V05_oct-13-20'
                         ]
                     };
                 },

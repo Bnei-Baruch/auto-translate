@@ -13,11 +13,6 @@
 
     <h1 class="title">Zohar Translate</h1>
 
-    <div class="menu model-select">
-        <div>Select translate model</div>
-        <select name="select" id="model-select"> </select>
-    </div>
-
     <div class="container">
 
         <span class="menu">
@@ -39,6 +34,39 @@
         <span class="menu"><button id="save-as-table" class="menu button">Save as a Table</button></span>
 
 
+    </div>
+
+    <div class="container">
+        <div class="select-container">
+
+            <div class="inline-select">
+                <div>Source Language</div>
+                <select id="select-src-lg"> </select>
+            </div>
+
+            <div class="inline-select">
+                <div>Destination Language</div>
+                <select id="select-dest-lg"> </select>
+            </div>
+
+            <div class="inline-select">
+                <div>Style</div>
+                <select id="select-style"> </select>
+            </div>
+
+            <div class="inline-select">
+                <div>Version</div>
+                <select id="select-version"> </select>
+            </div>
+
+            <div class="inline-select">
+                <div>Date</div>
+                <select id="select-date">
+                    <option value="nov-5-20" selected>nov-5-20</option>
+                </select>
+            </div>
+
+        </div>
     </div>
 
     <div class="container">
@@ -189,12 +217,20 @@
             copyText(text.innerText);
         });
 
+        var selects = document.querySelectorAll('.select-container .inline-select select');
+        selects.forEach(element => {
+            element.addEventListener('change', (e) => {
+                modelSelectChanged();
+            });
+        });
+            
+
         sendTextBtn.addEventListener('click', (event) => {
             const text = input.textContent;
             sendText(text);
         });
 
-        
+
     </script>
 </body>
 

@@ -17,12 +17,18 @@ callGetTranslateModels()
     .then(response => {
         if (response.ok) {
             var models = response.json().models;
-            var select = document.getElementById('model-select');
-            var stringContent = "";
-            models.forEach(element => {
-                stringContent += `<option value="${element}">${element}</option>`;
-            });  
-            select.innerHTML = stringContent;  
+            var objects = models.map(el => {
+                var parts = el.split('_');
+                return {
+                    srcLang: parts[0],
+                    destLang: parts[1],
+                    style: parts[2],
+                    version: parts[3],
+                    date: parts[4]
+                }
+            })
+            window.translateModels = objects;
+            modelSelectChanged();
         } else {
             console.log(response);
         }
@@ -30,3 +36,4 @@ callGetTranslateModels()
     .catch(error => {
         console.error('Error:', error);
     });
+
