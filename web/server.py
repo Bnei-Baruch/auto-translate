@@ -74,6 +74,6 @@ if __name__ == '__main__':
     parser.add_argument('--backend', default='huggingface')
     args = parser.parse_args()
     ARGS = args
-    shutil.rmtree('progress')
+    shutil.rmtree('progress', ignore_errors=True)
     os.mkdir('progress')
     app.run(host=args.host, port=args.port)
