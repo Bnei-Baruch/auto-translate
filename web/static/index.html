@@ -92,7 +92,8 @@
     <!-- order is vital here! -->
     <script type="text/javascript" src="dictaphone.js"></script>
     <script type="text/javascript" src="utils.js"></script>
-    <script type="text/javascript" src="server-actions-mock.js"></script>
+    <!-- <script type="text/javascript" src="server-actions-mock.js"></script> -->
+    <script type="text/javascript" src="server-actions.js"></script>
     <script type="text/javascript" src="default-actions.js"></script>
 
     <script type="text/javascript">
@@ -117,13 +118,10 @@
             var i = 1;
             var interval = setInterval(() => {
                 callProgressInPercents(timestamp, i)
+                    .then(response => response.json())
                     .then(response => {
-                        if (response.ok) {
-                            var percent = +response.json().progress;
+                            var percent = +response.progress;
                             showProgress(percent);
-                        } else {
-                            console.error(response);
-                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);

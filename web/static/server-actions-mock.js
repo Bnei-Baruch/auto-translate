@@ -30,7 +30,7 @@ function callProgressInPercents(timestamp, number = null) {
 }
 
 function callFileProcessing(file, timestamp, model) {
-    return fetch('/', {
+    return fetch('/upload', {
         method: 'PUT',
         body: file
     });

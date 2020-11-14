@@ -14,6 +14,17 @@ from tqdm import trange
 # from fairseq.models.transformer import TransformerModel
 
 
+def model_setup():
+    if not os.path.exists('models/he_en_zohar_V1_nov-14-20'):
+        url = 'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download'  # new
+        output = 'model.zip'
+        gdown.download(url, output, quiet=False)
+        with ZipFile('model.zip', 'r') as zipf:
+            zipf.extractall()
+        shutil.move('content/model', 'models/he_en_zohar_V1_nov-14-20')
+        shutil.rmtree('content')
+
+
 def process(content, lang='he'):
     "the main logic: splits the input into chunks, runs replacement regexes and saves the output"
     output = paragraphs(content)
@@ -26,6 +37,7 @@ def split_content(content, max_words, source):
     output, words_processed, words_total = res
     print(f'Processed {words_processed} words out of {words_total} ({100*words_processed/words_total}%)')
     return output
+
 
 class Model1:
     def __call__(self, mimetype, text):
@@ -45,47 +57,20 @@ class BadModel:
 
 
 class TranslationModel:
-    def __init__(self, args):
+    def __init__(self, model, timestamp, args):
+        self.timestamp = timestamp
+        with open(f'progress/{self.timestamp}.txt', 'w') as f:
+            f.write('0/0')
         self.bs = args.bs
         self.backend = args.backend
-        if args.threads != -1: torch.set_num_threads(args.threads)
+        if args.threads != -1:
+            torch.set_num_threads(args.threads)
         print(f'Running with {torch.get_num_threads()} threads.')
         if self.backend == 'huggingface':
-            if not os.path.exists('hf_model'):
-                # url = 'https://drive.google.com/u/0/uc?id=1JxFMdUAKGjEuGZAMdHnGrMvJrf9YVi-I&export=download' #v4
-                url = 'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download' #new
-                output = 'model.zip'
-                gdown.download(url, output, quiet=False)
-                with ZipFile('model.zip', 'r') as zipf:
-                    zipf.extractall()
-                shutil.move('content/model', 'hf_model')
-                shutil.rmtree('content')
-            mname = 'hf_model'
+            mname = 'models/he_en_zohar_V1_nov-14-20'
             self.torch_device = 'cpu'
             self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
             self.trained_tok = AutoTokenizer.from_pretrained(mname)
-        # elif self.backend == 'fairseq':
-        #     if not os.path.exists('fairseq_model'):
-        #         url = 'https://drive.google.com/u/0/uc?id=1seEou8d0SrzjQ133YZsh5TMNZIy7EBPX&export=download'
-        #         output = 'fairseq_model.zip'
-        #         gdown.download(url, output, quiet=False)
-        #         with ZipFile('fairseq_model.zip', 'r') as zipf:
-        #             zipf.extractall()
-        #         # shutil.move('content/model', 'fairseq_model')
-        #         # shutil.rmtree('content')
-        #     if not os.path.exists('he_dict'):
-        #         url = 'https://drive.google.com/u/0/uc?id=1z_Efnsf_zS3g1cgRLYLRYSCwKHg8qTxA&export=download'
-        #         output = 'he_dict'
-        #         gdown.download(url, output, quiet=False)
-        #     mname = 'checkpoint_best.pt'
-        #     he2en = TransformerModel.from_pretrained(
-        #         '.',
-        #         checkpoint_file=mname,
-        #         data_name_or_path='.',
-        #         bpe='fastbpe',
-        #         bpe_codes='fairseq_codes'
-        #     )
-        #     self.trained_model = he2en
 
     def get_translated_text(self, text):
         text = [t for t in text if t]
@@ -112,6 +97,8 @@ class TranslationModel:
                 end = start+bs
                 curr_batch = batch_s[start:end]
                 res_arr.extend(self.get_translated_text(curr_batch))
+                with open(f'progress/{self.timestamp}.txt', 'w') as f:
+                    f.write(f'{b+1}/{n_batches}')
         else:
             res_arr = self.get_translated_text(s)
         result = '\n'.join(res for res in res_arr)
@@ -119,9 +106,11 @@ class TranslationModel:
         return result
 
     def __call__(self, mimetype, content):
+        res = {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
         if mimetype.startswith("text"):
             txt = content.decode()
-            return {'en': self.translate(txt), 'he': txt}
+            res['en'] = self.translate(txt)
+            res['he'] = txt
         elif mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
             processed_content = process(content)
             split_txt = split_content(processed_content, max_words=200, source='he')
@@ -129,8 +118,10 @@ class TranslationModel:
             translated_txt = self.translate(txt)
             txt = '\n\n'.join(txt.split('\n'))
             translated_txt = '\n\n'.join(translated_txt.split('\n'))
-            return {'en': translated_txt, 'he': txt}
-        return {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
+            res['en'] = translated_txt
+            res['he'] = txt
+        os.remove(f'progress/{self.timestamp}.txt')
+        return res
 
 
-ACTIVE = TranslationModel
+model_setup()
