@@ -114,34 +114,31 @@
             document.body.removeChild(elem);
         }
 
-        function setupProgressInterval(timestamp){
+        function setupProgressInterval(timestamp) {
             var i = 1;
             var interval = setInterval(() => {
                 callProgressInPercents(timestamp, i)
                     .then(response => response.json())
                     .then(response => {
-                            var percent = +response.progress;
-                            showProgress(percent);
+                        var percent = +response.progress;
+                        showProgress(percent);
                     })
                     .catch(error => {
                         console.error('Error:', error);
                     });
                 i += 2;
-            }, 500)
+            }, 1 * 1000)
 
             return interval;
         }
 
-        function send(file, text) {
+        function send(file) {
             input.innerText = "";
             edited.innerText = "";
             load.value = '';
 
             var timestamp = getTimestamp();
             var model = getSelectedTranslateModel();
-           
-            blockInput();
-            var interval = setupProgressInterval(timestamp);
 
             callFileProcessing(file, timestamp, model)
                 .then(response => {
@@ -167,6 +164,9 @@
                     setTimeout(() => hideProgress(), 0);
                     console.error('Error:', error);
                 });
+
+            blockInput();
+            var interval = setupProgressInterval(timestamp);
         }
 
         function sendText(text) {
@@ -174,9 +174,6 @@
 
             var timestamp = getTimestamp();
             var model = getSelectedTranslateModel();
-
-            blockInput();
-            var interval = setupProgressInterval(timestamp);
 
             callTextProcessing(text, timestamp, model)
                 .then(response => {
@@ -199,6 +196,9 @@
                     hideProgress();
                     console.error('Error:', error);
                 });
+
+            blockInput();
+            var interval = setupProgressInterval(timestamp);
         }
 
         document.getElementById('fileload-btn')
@@ -221,14 +221,12 @@
                 modelSelectChanged();
             });
         });
-            
+
 
         sendTextBtn.addEventListener('click', (event) => {
             const text = input.textContent;
             sendText(text);
         });
-
-
     </script>
 </body>
 

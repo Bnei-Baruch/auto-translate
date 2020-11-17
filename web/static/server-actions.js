@@ -19,27 +19,34 @@ function callFileProcessing(file, timestamp, model) {
 
 function callTextProcessing(text, timestamp, model) {
 
+    var data = {
+        text: text
+    };
+
     return fetch(`/text?timestamp=${timestamp}&model=${model}`, {
         method: 'POST',
-        body: {
-            text: text
-        },
+        body: JSON.stringify(data),
         headers: {
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
-        },
+          },
     });
 }
 
 function callSaveAsTable(textInput, textOutput, model) {
+
+    var data = {
+        textInput: textInput,
+        textOutput: textOutput
+    };
+
     return fetch(`/save-as-table?timestamp=${timestamp}&model=${model}`, {
         method: 'POST',
-        body: {
-            textInput: textInput,
-            textOutput: textOutput
-        },
+        body: JSON.stringify(data),
         headers: {
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
-        },
+          },
     });
 }
 
