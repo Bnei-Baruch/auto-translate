@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from zohar_preprocess_file import *
 from zohar_split_heuristic import *
@@ -11,18 +12,25 @@ import numpy as np
 import shutil
 from time import time
 from tqdm import trange
+
+
 # from fairseq.models.transformer import TransformerModel
 
 
 def model_setup():
-    if not os.path.exists('models/he_en_zohar_V1_nov-14-20'):
-        url = 'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download'  # new
-        output = 'model.zip'
-        gdown.download(url, output, quiet=False)
-        with ZipFile('model.zip', 'r') as zipf:
-            zipf.extractall()
-        shutil.move('content/model', 'models/he_en_zohar_V1_nov-14-20')
-        shutil.rmtree('content')
+    models = {'he_en_zohar_V1':
+                  'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download',
+              'en_sp_zohar_V1':
+                  'https://drive.google.com/u/0/uc?id=195HjThVR1Y0KI93PvLbqpNXw2Iqg4stk&export=download'
+              }
+    for model_name, model_url in models.items():
+        if not os.path.exists(f'models/{model_name}'):
+            output = 'model.zip'
+            gdown.download(model_url, output, quiet=False)
+            with ZipFile('model.zip', 'r') as zipf:
+                zipf.extractall()
+            shutil.move('content/model', f'models/{model_name}')
+            shutil.rmtree('content')
 
 
 def process(content, lang='he'):
@@ -35,29 +43,17 @@ def process(content, lang='he'):
 def split_content(content, max_words, source):
     res = split_letters_source(content, max_words=max_words, source=source)
     output, words_processed, words_total = res
-    print(f'Processed {words_processed} words out of {words_total} ({100*words_processed/words_total}%)')
+    if words_total == 0:
+        raise Exception('No words found, bad format or wrong language maybe?')
+    print(f'Processed {words_processed} words out of {words_total} ({100 * words_processed / words_total}%)')
     return output
-
-
-class Model1:
-    def __call__(self, mimetype, text):
-        if mimetype.startswith("text"):
-            return {'en': 'Translation 1', 'he': text.decode()}
-        return {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
-
-
-class Model2:
-    def __call__(self, mimetype, text):
-        return {'en': 'Translation 2', 'he': 'מקור'}
-
-
-class BadModel:
-    def __call__(self, text):
-        raise Exception('Failed')
 
 
 class TranslationModel:
     def __init__(self, model, timestamp, args):
+        parts = model.split('_')
+        self.source = parts[0]
+        self.target = parts[1]
         self.timestamp = timestamp
         with open(f'progress/{self.timestamp}.txt', 'w') as f:
             f.write('0/0')
@@ -67,7 +63,7 @@ class TranslationModel:
             torch.set_num_threads(args.threads)
         print(f'Running with {torch.get_num_threads()} threads.')
         if self.backend == 'huggingface':
-            mname = 'models/he_en_zohar_V1_nov-14-20'
+            mname = 'models/' + model
             self.torch_device = 'cpu'
             self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
             self.trained_tok = AutoTokenizer.from_pretrained(mname)
@@ -93,12 +89,12 @@ class TranslationModel:
         if bs != -1:
             n_batches = int(np.ceil(len(batch_s) / bs))
             for b in trange(n_batches):
-                start = b*bs
-                end = start+bs
+                start = b * bs
+                end = start + bs
                 curr_batch = batch_s[start:end]
                 res_arr.extend(self.get_translated_text(curr_batch))
                 with open(f'progress/{self.timestamp}.txt', 'w') as f:
-                    f.write(f'{b+1}/{n_batches}')
+                    f.write(f'{b + 1}/{n_batches}')
         else:
             res_arr = self.get_translated_text(s)
         result = '\n'.join(res for res in res_arr)
@@ -106,21 +102,21 @@ class TranslationModel:
         return result
 
     def __call__(self, mimetype, content):
-        res = {'en': 'Translation 1', 'he': 'המקור אינו קובץ טקסט'}
+        res = {'target': 'Translation 1', 'source': 'Not a text file'}
         if mimetype.startswith("text"):
-            txt = content.decode()
-            res['en'] = self.translate(txt)
-            res['he'] = txt
+            txt = content
+            res['target'] = self.translate(txt)
+            res['source'] = txt
         elif mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
             processed_content = process(content)
-            split_txt = split_content(processed_content, max_words=200, source='he')
+            split_txt = split_content(processed_content, max_words=200, source=self.source)
             txt = join_text(split_txt)
             translated_txt = self.translate(txt)
             txt = '\n\n'.join(txt.split('\n'))
             translated_txt = '\n\n'.join(translated_txt.split('\n'))
-            res['en'] = translated_txt
-            res['he'] = txt
-        os.remove(f'progress/{self.timestamp}.txt')
+            res['target'] = translated_txt
+            res['source'] = txt
+        # os.remove(f'progress/{self.timestamp}.txt')
         return res
 
 

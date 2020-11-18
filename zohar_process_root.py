@@ -51,7 +51,7 @@ def main():
                         action='store_false', dest='strict')
     parser.add_argument("--no-combine-letters", help='do not combine letters (Ot) up to the words threshold',
                         action='store_false', dest='combine_letters')
-    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=224)
+    parser.add_argument("--words_threshold", help="number of words below which the Ot is not split (pass 0 to skip split heuristic)", default=256)
     parser.add_argument("--split_extension", help="extension of split files", default='.split.txt')
 
     parser.add_argument("--min_ratio", help="minimum target/source ratio", default=0.5)
@@ -61,21 +61,21 @@ def main():
 
     parser.set_defaults(skip=False)
     parser.set_defaults(strict=True)
-    parser.set_defaults(combine_letters=True)
+    parser.set_defaults(combine_letters=False)
     total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
     args = parser.parse_args()
     sources = sources_list(args.root)
     langs = (args.source, args.target)
     block = 'en' in langs
     block_list = ['F2LYqFgK', 'lgUtBujx']
-    dest_folder =f'{args.dest}_{args.source}_{args.target}'
+    dest_folder = f'{args.dest}_{args.source}_{args.target}'
     shutil.rmtree(dest_folder, ignore_errors=True)
     progress = tqdm.tqdm(range(len(sources)))
     for src, _ in zip(sources, progress):
         if block and src in block_list:
             continue
         try:
-            paths, title, base = download(src, dest_folder, langs)
+            paths, filename, base = download(src, dest_folder, langs)
             if args.skip:
                 continue
 
@@ -118,7 +118,7 @@ def main():
             summary = os.path.join(base, args.summary_name)
             with open(summary, 'w', encoding='utf-8') as f:
                 save_summary(tgt_path, src_path, langs,
-                             sep, args.min_ratio, args.max_ratio, title, ts, f)
+                             sep, args.min_ratio, args.max_ratio, filename, ts, f)
 
         except MissingLanguage:
             continue

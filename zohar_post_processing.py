@@ -2,14 +2,11 @@ import argparse
 import regexes
 import math
 import re
-
 from zohar_split_heuristic import append, append_str, save_file, letters_chunks
-
 import sys
 
+
 def combine_discard_non_matching(tgt_doc, src_doc, langs, sep, threshold, combine_letters):
-    "discards all letters with non-consistent chunks number"
-    "discards all letters with non-consistent chunks number"
     source, target = langs
     total_discarded, total_kept = 0, 0
     with open(tgt_doc, encoding='utf-8') as tgt_f, open(src_doc, encoding='utf-8') as src_f:
@@ -49,8 +46,9 @@ def combine_discard_non_matching(tgt_doc, src_doc, langs, sep, threshold, combin
                 tgt_one_chunk = append_str(tgt_one_chunk, letter, tgt, target)
                 src_one_chunk = append_str(src_one_chunk, letter, src, source)
             else:
-                append(tgt_letters, '', tgt_one_chunk, target)
-                append(src_letters, '', src_one_chunk, source)
+                if tgt_one_chunk != '' and src_one_chunk != '':
+                    append(tgt_letters, '', tgt_one_chunk, target)
+                    append(src_letters, '', src_one_chunk, source)
                 tgt_one_chunk = append_str('', letter, tgt, target)
                 src_one_chunk = append_str('', letter, src, source)
 

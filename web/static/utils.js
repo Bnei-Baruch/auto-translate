@@ -76,7 +76,7 @@ function getSelectedTranslateModel() {
     var selectVersion = document.getElementById('select-version');
     var selectedVersion = getSelectValue(selectVersion);
 
-    return `${selectedSrcLang}_${selectedDestLang}_${selectedStyle}_${selectedVersion}_nov-5-20`
+    return `${selectedSrcLang}_${selectedDestLang}_${selectedStyle}_${selectedVersion}`
 
 }
 

@@ -63,8 +63,9 @@ h3 {
     padding-right: 28pt;
 }
 
-.hebrew {
-    direction: rtl;
+.source {
+    /*direction: rtl;*/
+    unicode-bidi: plaintext;
 }
 
 .editable {

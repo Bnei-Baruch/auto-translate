@@ -21,8 +21,7 @@ callGetTranslateModels()
                 srcLang: parts[0],
                 destLang: parts[1],
                 style: parts[2],
-                version: parts[3],
-                date: parts[4]
+                version: parts[3]
             }
         })
         window.translateModels = objects;

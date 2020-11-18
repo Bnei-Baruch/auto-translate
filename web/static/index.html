@@ -59,19 +59,12 @@
                 <select id="select-version"> </select>
             </div>
 
-            <div class="inline-select">
-                <div>Date</div>
-                <select id="select-date">
-                    <option value="nov-5-20" selected>nov-5-20</option>
-                </select>
-            </div>
-
         </div>
     </div>
 
     <div class="container">
 
-        <span contenteditable="true" class="hebrew text" id="input">
+        <span contenteditable="true" class="source text" id="input">
         </span>
         <span class="arrow">➪</span>
         <span contenteditable="true" class="editable text" id="edited">
@@ -92,7 +85,6 @@
     <!-- order is vital here! -->
     <script type="text/javascript" src="dictaphone.js"></script>
     <script type="text/javascript" src="utils.js"></script>
-    <!-- <script type="text/javascript" src="server-actions-mock.js"></script> -->
     <script type="text/javascript" src="server-actions.js"></script>
     <script type="text/javascript" src="default-actions.js"></script>
 
@@ -147,15 +139,15 @@
                     setTimeout(() => hideProgress(), 0);
 
                     return response.ok ? response.json() : {
-                        "en": response.statusText,
-                        "he": "שגיאה"
+                        "target": response.statusText,
+                        "source": "ERROR"
                     }
                 })
                 .then(texts => {
-                    if ("en" in texts)
-                        edited.innerText = texts["en"];
-                    if ("he" in texts)
-                        input.innerText = texts["he"];
+                    if ("target" in texts)
+                        edited.innerText = texts["target"];
+                    if ("source" in texts)
+                        input.innerText = texts["source"];
                     edited.focus();
                 })
                 .catch(error => {
@@ -181,13 +173,13 @@
                     clearInterval(interval);
                     hideProgress();
                     return response.ok ? response.json() : {
-                        translatedText: response.statusText,
-                        sourceText: "שגיאה"
+                        target: response.statusText,
+                        source: "ERROR"
                     }
                 })
                 .then(texts => {
-                    edited.innerText = texts.translatedText;
-                    input.innerText = texts.sourceText;
+                    edited.innerText = texts.target;
+                    input.innerText = texts.source;
                     edited.focus();
                 })
                 .catch(error => {
