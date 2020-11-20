@@ -5,4 +5,5 @@ REGEXES = {'he': regexes_he,
            'en': regexes_en,
            'de': regexes_en,  # FOR NOW
            'ru': regexes_en,  # FOR NOW
+           'sp': regexes_en,  # FOR NOW
            'ua': regexes_en}  # FOR NOW

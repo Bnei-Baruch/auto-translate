@@ -35,6 +35,8 @@ def letters_chunks(tgt_doc, src_doc, langs):
 def append(output, letter, content, lang, letter_only_once=False):
     "append letter entry to output list"
     letter = str(letter)
+    if letter == '' and content == '':
+        pass
     if letter_only_once:
         if len(output) > 0:
             output.append(('', content))

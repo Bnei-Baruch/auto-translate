@@ -5,6 +5,7 @@ import lxml.html
 import argparse
 import os
 from pathlib import Path
+import shutil
 
 # Base url of articles in different languages
 SOURCE_BASE_URL = 'https://kabbalahmedia.info/{lang}/sources/'
@@ -37,13 +38,14 @@ class NoArticleId(Exception):
 class Asset:
     "Web page content and title"
 
-    def __init__(self, content, title, lang):
+    def __init__(self, content, filename, lang, local=False):
         self.content = content
-        self.title = title
+        self.filename = filename
         self.lang = lang
+        self.local = local
 
-    def formatted_title(self, _id):
-        formatted = self.title.split('|')[0].split('-')[0].strip().replace(' ', '-')
+    def formatted_filename(self, _id):
+        formatted = self.filename
         return f'{formatted}-{_id}'
         
 def lang_links(txt):
@@ -76,15 +78,21 @@ def load_assets(article_id, langs, fmt=FORMAT):
 
     source_url = SOURCE_BASE_URL.format(lang=langs[0]) + article_id
     src = requests.get(source_url)
-    title = lxml.html.fromstring(src.text).findtext('.//title')
-    
+
     links = json.loads(lang_links(src.text))
+    filename = ''
+    if langs[0] in links:
+        filename = links[langs[0]]['docx'].split('_')[-1][:-5]
     for lang in langs:
         if lang not in links:
-            raise MissingLanguage(article_id, lang)
-    
-        url = ASSET_BASE_URL + article_id + '/' + links[lang][fmt]
-        yield Asset(requests.get(url).content, title, lang)
+            if not os.path.exists(f'zohar_{lang}/{filename}.docx'):
+                raise MissingLanguage(article_id, lang)
+            else:
+                yield Asset('', filename, lang, True)
+        else:
+            filename = links[lang]['docx'].split('_')[-1][:-5]
+            url = ASSET_BASE_URL + article_id + '/' + links[lang][fmt]
+            yield Asset(requests.get(url).content, filename, lang)
 
 def extract_id(asset_url):
     """Extracts document id from url.
@@ -105,32 +113,31 @@ def file_size(path):
         return -1
 
 def download(_id, dest='', langs=('he', 'en')):
-    source, target = langs
     assets = list(load_assets(_id, langs=langs))
 
     assert assets, "documents number must be equal to LANGS length"
 
-    folder = assets[0].formatted_title(_id)
+    folder = assets[0].formatted_filename(_id)
     base = os.path.join(dest, folder).replace("\"", "_")
     os.makedirs(base, exist_ok=True)
 
     paths = []
-    title = ''
+    filename = ''
     
     for asset in assets:
         path = os.path.join(base, asset.lang) + '.' + FORMAT
         paths.append((asset.lang, path))
 
         if asset.lang != 'he':# if asset.lang == 'en':
-            title = asset.title
+            filename = asset.filename
 
-        if file_size(path) == len(asset.content):
-            continue
+        if not asset.local:
+            with open(path, 'wb') as f:
+                f.write(asset.content)
+        else:
+            shutil.copyfile(f'zohar_{asset.lang}/{filename}.docx', path)
 
-        with open(path, 'wb') as f:
-            f.write(asset.content)
-
-    return paths, title, base
+    return paths, filename, base
 
 def main():
     parser = argparse.ArgumentParser()

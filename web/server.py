@@ -6,7 +6,7 @@ import argparse
 import logging
 
 log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 
@@ -50,9 +50,11 @@ def text_translate():
     model_name = request.args.get('model')
     model = TranslationModel(model_name, timestamp, ARGS)
     content_type = request.mimetype
-    text = request.get_data()
+    text = request.get_data().decode()
+    if content_type.endswith('json'):
+        text = request.json['text']
     res = model("text", text)
-    return {'sourceText': text, 'translatedText': res}
+    return res
 
 
 @app.route('/save-as-table', methods=['POST'])
