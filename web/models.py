@@ -103,19 +103,15 @@ class TranslationModel:
 
     def __call__(self, mimetype, content):
         res = {'target': 'Translation 1', 'source': 'Not a text file'}
-        if mimetype.startswith("text"):
-            txt = content
-            res['target'] = self.translate(txt)
-            res['source'] = txt
-        elif mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            processed_content = process(content)
-            split_txt = split_content(processed_content, max_words=200, source=self.source)
-            txt = join_text(split_txt)
-            translated_txt = self.translate(txt)
-            txt = '\n\n'.join(txt.split('\n'))
-            translated_txt = '\n\n'.join(translated_txt.split('\n'))
-            res['target'] = translated_txt
-            res['source'] = txt
+        if mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            content = process(content)
+        split_txt = split_content(content, max_words=200, source=self.source)
+        txt = join_text(split_txt)
+        translated_txt = self.translate(txt)
+        txt = '\n\n'.join(txt.split('\n'))
+        translated_txt = '\n\n'.join(translated_txt.split('\n'))
+        res['target'] = translated_txt
+        res['source'] = txt
         # os.remove(f'progress/{self.timestamp}.txt')
         return res
 
