@@ -43,8 +43,8 @@ function callTextProcessing(text, timestamp, model) {
                 ok: true,
                 json: function () {
                     return {
-                        sourceText: text,
-                        translatedText: "translated text"
+                        source: text,
+                        target: "translated text"
                     };
                 },
             });

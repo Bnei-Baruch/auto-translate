@@ -189,7 +189,7 @@ function setTexts(sourceTexts, destText) {
     edited.focus();
 }
 
-function resetAllTexts(sourceTexts, destText) {
+function resetAllTexts() {
 
     const input = document.getElementById("input");
     const edited = document.getElementById("edited");

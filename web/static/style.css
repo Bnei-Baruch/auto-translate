@@ -48,7 +48,6 @@ textarea.text {
     resize: none;
     min-height: 50px;
     white-space: pre-line;
-    /* max-height: 100px; */
 }
 
 textarea:disabled { 
