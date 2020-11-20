@@ -51,6 +51,11 @@ textarea.text {
     /* max-height: 100px; */
 }
 
+textarea:disabled { 
+        cursor: not-allowed;
+        background-color: lightgrey;
+   }
+
 h1 {
     text-align: center;
 }

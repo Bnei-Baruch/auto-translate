@@ -21,7 +21,7 @@
         </span>
 
         <span class="menu">
-            <button id="send-text-for-translation" class="menu button">Send Text</button>
+            <button id="send-text-for-translation" class="menu button" disabled>Send Text</button>
         </span>
 
         <span class="menu">
@@ -29,9 +29,9 @@
             <audio class="audio" controls="true" disabled="true"></audio>
         </span>
 
-        <span class="menu"><button id="copy" class="menu button">Copy Output</button></span>
+        <span class="menu"><button id="copy" class="menu button" disabled>Copy Output</button></span>
 
-        <span class="menu"><button id="save-as-table" class="menu button">Save as a Table</button></span>
+        <span class="menu"><button id="save-as-table" class="menu button" disabled>Save as a Table</button></span>
 
 
     </div>
@@ -70,9 +70,9 @@
     </div>
 
     <div class="container">
-        <textarea class="hebrew text" id="input" ></textarea>
+        <textarea class="hebrew text" id="input"></textarea>
         <span class="arrow">➪</span>
-        <textarea class="editable text" id="edited"></textarea>
+        <textarea class="editable text" id="edited" disabled></textarea>
     </div>
 
     <div class="progress-container">
@@ -128,9 +128,9 @@
             return interval;
         }
 
+
         function send(file) {
-            input.innerText = "";
-            edited.innerText = "";
+
             load.value = '';
 
             var timestamp = getTimestamp();
@@ -139,6 +139,7 @@
             callFileProcessing(file, timestamp, model)
                 .then(response => {
                     unblockInput();
+                    unblockDestination();
                     clearInterval(interval);
                     setTimeout(() => hideProgress(), 0);
 
@@ -148,20 +149,9 @@
                     }
                 })
                 .then(texts => {
-
-                    console.log(texts);
-
-                    if ("en" in texts){
-                        edited.innerText = texts["en"];
-                        edited.dispatchEvent(new Event('input', { bubbles: false }));
-                    }
-                    
-                    if ("he" in texts){
-                        input.innerText = texts["he"];
-                        input.dispatchEvent(new Event('input', { bubbles: false }));
-                    }
-                        
-                    edited.focus();
+                    var srcText = ("he" in texts) ? texts["he"] : null;
+                    var destText = ("en" in texts) ? texts["en"] : null;
+                    setTexts(srcText, destText);
                 })
                 .catch(error => {
                     unblockInput();
@@ -170,6 +160,7 @@
                     console.error('Error:', error);
                 });
 
+            blockDestination();
             blockInput();
             var interval = setupProgressInterval(timestamp);
         }
@@ -183,6 +174,7 @@
             callTextProcessing(text, timestamp, model)
                 .then(response => {
                     unblockInput();
+                    unblockDestination();
                     clearInterval(interval);
                     hideProgress();
                     return response.ok ? response.json() : {
@@ -191,12 +183,7 @@
                     }
                 })
                 .then(texts => {
-                    edited.innerText = texts.translatedText;
-                    edited.dispatchEvent(new Event('input', { bubbles: false }));
-                    edited.focus();
-
-                    input.innerText = texts.sourceText;
-                    input.dispatchEvent(new Event('input', { bubbles: false }));
+                    setTexts(texts.sourceText, texts.translatedText);
                 })
                 .catch(error => {
                     unblockInput();
@@ -205,6 +192,7 @@
                     console.error('Error:', error);
                 });
 
+            blockDestination();
             blockInput();
             var interval = setupProgressInterval(timestamp);
         }
@@ -219,8 +207,8 @@
         });
 
         copy.addEventListener('click', (event) => {
-            const text = document.querySelector('.editable');
-            copyText(text.innerText);
+            const text = document.getElementById('edited');
+            copyText(text.innerHTML);
         });
 
         var selects = document.querySelectorAll('.select-container .inline-select select');
@@ -237,13 +225,21 @@
             });
         });
 
+        input.addEventListener('input', function (event) {
+            const text = input.value;
+            const sendTextBtn = document.getElementById("send-text-for-translation");
 
-        sendTextBtn.addEventListener('click', (event) => {
-            const text = input.textContent;
-            sendText(text);
+            if(text && sendTextBtn.disabled){
+                sendTextBtn.disabled = false;
+            }else if(!text && !sendTextBtn.disabled){
+                sendTextBtn.disabled = true;
+            }
         });
 
-        
+        sendTextBtn.addEventListener('click', (event) => {
+            const text = input.value;
+            sendText(text);
+        });
     </script>
 </body>
 

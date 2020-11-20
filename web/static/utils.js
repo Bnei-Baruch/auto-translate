@@ -153,12 +153,12 @@ function modelSelectChanged() {
     var selectedVersion = getSelectValue(selectVersion);
 
     selectVersion.innerHTML = models
-    .map(el => el.version)
-    .filter((v, i, a) => a.indexOf(v) === i)
-    .map((element, i) => {
-        var selected = selectVersion == element ? 'selected' : '';
-        return `<option value="${element}" ${selected}>${element}</option>`;
-    }).join("");
+        .map(el => el.version)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .map((element, i) => {
+            var selected = selectVersion == element ? 'selected' : '';
+            return `<option value="${element}" ${selected}>${element}</option>`;
+        }).join("");
 
     if (selectedVersion !== null) {
         models = models.filter(m => m.version === getSelectValue(selectVersion));
@@ -168,6 +168,61 @@ function modelSelectChanged() {
 
 function auto_grow(element) {
     element.style.height = "5px";
-    element.style.height = (element.scrollHeight)+"px";
+    element.style.height = (element.scrollHeight) + "px";
 }
 
+function setTexts(sourceTexts, destText) {
+
+    const input = document.getElementById("input");
+    const edited = document.getElementById("edited");
+
+    edited.innerHTML = destText;
+    edited.dispatchEvent(new Event('input', {
+        bubbles: false
+    }));
+
+    input.innerHTML = sourceTexts;
+    input.dispatchEvent(new Event('input', {
+        bubbles: false
+    }));
+
+    edited.focus();
+}
+
+function resetAllTexts(sourceTexts, destText) {
+
+    const input = document.getElementById("input");
+    const edited = document.getElementById("edited");
+
+    edited.innerHTML = "";
+    edited.dispatchEvent(new Event('input', {
+        bubbles: false
+    }));
+
+    input.innerHTML = "";
+    input.dispatchEvent(new Event('input', {
+        bubbles: false
+    }));
+}
+
+function blockDestination() {
+    const edited = document.getElementById("edited");
+    edited.disabled = true;
+
+    const copyBtn = document.getElementById("copy");
+    copyBtn.disabled = true;
+
+    const saveTableBtn = document.getElementById("save-as-table");
+    saveTableBtn.disabled = true;
+}
+
+function unblockDestination() {
+    const edited = document.getElementById("edited");
+    edited.disabled = false;
+
+    const copyBtn = document.getElementById("copy");
+    copyBtn.disabled = false;
+
+    const saveTableBtn = document.getElementById("save-as-table");
+    saveTableBtn.disabled = false;
+}
