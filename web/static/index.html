@@ -63,9 +63,9 @@
     </div>
 
     <div class="container">
-        <textarea class="hebrew text" id="input"></textarea>
+        <textarea dir="auto" class="hebrew text" id="input"></textarea>
         <span class="arrow">➪</span>
-        <textarea class="editable text" id="edited" disabled></textarea>
+        <textarea dir="auto" class="editable text" id="edited" disabled></textarea>
     </div>
 
     <div class="progress-container">
@@ -140,8 +140,8 @@
                     }
                 })
                 .then(texts => {
-                    var srcText = ("he" in texts) ? texts["he"] : null;
-                    var destText = ("en" in texts) ? texts["en"] : null;
+                    var srcText = ("source" in texts) ? texts["source"] : null;
+                    var destText = ("target" in texts) ? texts["target"] : null;
                     setTexts(srcText, destText);
                 })
                 .catch(error => {
