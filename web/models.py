@@ -21,20 +21,21 @@ def model_setup():
     models = {'he_en_zohar_V1':
                   'https://drive.google.com/u/0/uc?id=1pbiJNqtQ3W4fJmk3cH-8sD-mZ7eUp4JK&export=download',
               'en_sp_zohar_V1':
-                  'https://drive.google.com/u/0/uc?id=195HjThVR1Y0KI93PvLbqpNXw2Iqg4stk&export=download'
+                  'https://drive.google.com/u/0/uc?id=195HjThVR1Y0KI93PvLbqpNXw2Iqg4stk&export=download',
+              'he_sp_zohar_V1':
+                  'https://drive.google.com/u/0/uc?id=1IVPls1YJyJFhrfArKSNkUrZJiQghpT9o&export=download',
               }
     for model_name, model_url in models.items():
         if not os.path.exists(f'models/{model_name}'):
             output = 'model.zip'
             gdown.download(model_url, output, quiet=False)
-            with ZipFile('model.zip', 'r') as zipf:
+            with ZipFile(output, 'r') as zipf:
                 zipf.extractall()
             shutil.move('content/model', f'models/{model_name}')
             shutil.rmtree('content')
 
 
 def process(content, lang='he'):
-    "the main logic: splits the input into chunks, runs replacement regexes and saves the output"
     output = paragraphs(content)
     output = replace(output, lang)
     return output
