@@ -111,8 +111,8 @@ class TranslationModel:
         translated_txt = self.translate(txt)
         txt = '\n\n'.join(txt.split('\n'))
         translated_txt = '\n\n'.join(translated_txt.split('\n'))
-        res['target'] = translated_txt
-        res['source'] = txt
+        res['target'] = translated_txt.strip()
+        res['source'] = txt.strip()
         # os.remove(f'progress/{self.timestamp}.txt')
         return res
 

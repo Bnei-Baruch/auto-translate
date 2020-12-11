@@ -60,13 +60,14 @@ def text_translate():
 
 @app.route('/save-as-table', methods=['POST'])
 def save_table():
+    langs = {'he': 'Hebrew', 'en': 'English', 'sp': 'Spanish'}
     timestamp = request.args.get('timestamp')
     model_name = request.args.get('model')
     source, target = model_name.split('_')[0], model_name.split('_')[1]
-    inp = request.json['textInput']
-    outp = request.json['textOutput']
+    inp = request.json['textInput'].replace('\n\n', '\n')
+    outp = request.json['textOutput'].replace('\n\n', '\n')
     raw_table = [list(t) for t in zip(inp.split('\n'), outp.split('\n'))]
-    headers = [source, target]
+    headers = [langs[source], langs[target]]
     colalign = ('right' if source == 'he' else 'left', 'right' if target == 'he' else 'left')
     table = tabulate(raw_table, tablefmt='html', headers=headers, colalign=colalign)
     return {'table': table}

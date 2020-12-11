@@ -176,12 +176,12 @@ function setTexts(sourceTexts, destText) {
     const input = document.getElementById("input");
     const edited = document.getElementById("edited");
 
-    edited.innerHTML = destText;
+    edited.value = destText;
     edited.dispatchEvent(new Event('input', {
         bubbles: false
     }));
 
-    input.innerHTML = sourceTexts;
+    input.value = sourceTexts;
     input.dispatchEvent(new Event('input', {
         bubbles: false
     }));
@@ -194,12 +194,12 @@ function resetAllTexts() {
     const input = document.getElementById("input");
     const edited = document.getElementById("edited");
 
-    edited.innerHTML = "";
+    edited.value = "";
     edited.dispatchEvent(new Event('input', {
         bubbles: false
     }));
 
-    input.innerHTML = "";
+    input.value = "";
     input.dispatchEvent(new Event('input', {
         bubbles: false
     }));
