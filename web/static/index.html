@@ -91,6 +91,7 @@
         const input = document.getElementById("input");
         const edited = document.getElementById("edited");
         const sendTextBtn = document.getElementById("send-text-for-translation");
+        const saveTableBtn = document.getElementById("save-as-table");
 
         function copyText(text) {
             /* Select the text field */
@@ -189,6 +190,37 @@
             var interval = setupProgressInterval(timestamp);
         }
 
+        function download_table(textInput, textOutput) {
+            var timestamp = getTimestamp();
+            var model = getSelectedTranslateModel();
+            var filename = prompt('File name:');
+            if (!filename)
+                return;
+            if (!filename.endsWith('.html'))
+                filename = filename.concat('.html');
+
+            callSaveAsTable(textInput, textOutput, timestamp, model)
+                .then(response => {
+                    return response.ok ? response.json() : {
+                        target: response.statusText,
+                        source: "ERROR"
+                    }
+                })
+                .then(table => {
+                    var element = document.createElement('a');
+                    element.setAttribute('href', 'data:text/html;charset=UTF-8,'
+                        + encodeURIComponent(table['table']));
+                    element.setAttribute('download', filename);
+
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+
+                    element.click();
+
+                    document.body.removeChild(element);
+                })
+        }
+
         document.getElementById('fileload-btn')
             .addEventListener('click', (event) => {
                 load.click();
@@ -231,6 +263,12 @@
         sendTextBtn.addEventListener('click', (event) => {
             const text = input.value;
             sendText(text);
+        });
+
+        saveTableBtn.addEventListener('click', (event) => {
+            const textInput = input.value;
+            const textOutput = edited.value;
+            download_table(textInput, textOutput);
         });
     </script>
 </body>

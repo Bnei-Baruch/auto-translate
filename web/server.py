@@ -1,5 +1,6 @@
 from flask import Flask, current_app, request, jsonify, make_response
 import psutil
+from tabulate import tabulate
 import os
 from models import *
 import argparse
@@ -58,8 +59,17 @@ def text_translate():
 
 
 @app.route('/save-as-table', methods=['POST'])
-def save_table(timestamp, model):
-    pass
+def save_table():
+    timestamp = request.args.get('timestamp')
+    model_name = request.args.get('model')
+    source, target = model_name.split('_')[0], model_name.split('_')[1]
+    inp = request.json['textInput']
+    outp = request.json['textOutput']
+    raw_table = [list(t) for t in zip(inp.split('\n'), outp.split('\n'))]
+    headers = [source, target]
+    colalign = ('right' if source == 'he' else 'left', 'right' if target == 'he' else 'left')
+    table = tabulate(raw_table, tablefmt='html', headers=headers, colalign=colalign)
+    return {'table': table}
 
 
 @app.route('/translate-models', methods=['GET'])

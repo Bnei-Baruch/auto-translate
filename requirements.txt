@@ -1,6 +1,7 @@
 python-docx
 psutil
 requests~=2.24.0
+tabulate~=0.8.7
 tqdm~=4.43.0
 gdown~=3.12.2
 torch~=1.6.0

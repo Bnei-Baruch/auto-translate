@@ -33,7 +33,7 @@ function callTextProcessing(text, timestamp, model) {
     });
 }
 
-function callSaveAsTable(textInput, textOutput, model) {
+function callSaveAsTable(textInput, textOutput, timestamp, model) {
 
     var data = {
         textInput: textInput,
