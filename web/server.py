@@ -61,14 +61,25 @@ def text_translate():
 @app.route('/save-as-table', methods=['POST'])
 def save_table():
     langs = {'he': 'Hebrew', 'en': 'English', 'sp': 'Spanish'}
-    timestamp = request.args.get('timestamp')
     model_name = request.args.get('model')
     source, target = model_name.split('_')[0], model_name.split('_')[1]
+    alignment = 'standard'
+    if 'he' == source or 'he' == target:
+        alignment = 'special'
     inp = request.json['textInput'].replace('\n\n', '\n')
     outp = request.json['textOutput'].replace('\n\n', '\n')
-    raw_table = [list(t) for t in zip(inp.split('\n'), outp.split('\n'))]
-    headers = [langs[source], langs[target]]
-    colalign = ('right' if source == 'he' else 'left', 'right' if target == 'he' else 'left')
+    order = tuple()
+    if alignment == 'special' and 'he' == source:
+        order = zip(outp.split('\n'), inp.split('\n'))
+    else:
+        order = zip(inp.split('\n'), outp.split('\n'))
+    raw_table = [list(t) for t in order]
+    headers = []
+    if alignment == 'special' and 'he' == source:
+        headers = [langs[target], langs[source]]
+    else:
+        headers = [langs[source], langs[target]]
+    colalign = ('left', 'right' if alignment == 'special' else 'left')
     table = tabulate(raw_table, tablefmt='html', headers=headers, colalign=colalign)
     return {'table': table}
 
