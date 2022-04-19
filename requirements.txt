@@ -1,9 +1,10 @@
 python-docx
 psutil
 requests~=2.24.0
-git+git://github.com/orendar/python-tabulate@master
+git+https://github.com/orendar/python-tabulate
 tqdm~=4.43.0
 gdown~=3.12.2
-torch~=1.6.0
-transformers~=3.3.1
+torch~=1.11.0
+transformers~=4.18.0
 flask~=1.1.2
+sentencepiece
