@@ -22,8 +22,10 @@ SAMPLE_URL = 'https://kabbalahmedia.info/he/sources/yUcfylRm'
 # Documents format
 FORMAT = 'docx'
 
+
 class HtmlFormatChanged(Exception):
     pass
+
 
 class MissingLanguage(Exception):
     def __init__(self, article_id, lang):
@@ -31,9 +33,11 @@ class MissingLanguage(Exception):
         self.article_id = article_id
         self.lang = lang
 
+
 class NoArticleId(Exception):
     def __init__(self, url):
         super().__init__("Could not extract article id from url " + url)
+
 
 class Asset:
     "Web page content and title"
@@ -47,7 +51,8 @@ class Asset:
     def formatted_filename(self, _id):
         formatted = self.filename
         return f'{formatted}-{_id}'
-        
+
+
 def lang_links(txt):
     """This function extracts links per language part from a webpage.
 
@@ -57,7 +62,7 @@ def lang_links(txt):
     """
 
     START_HINT = '"data":{'
-    
+
     start = txt.find(START_HINT)
     if start < 0:
         raise HtmlFormatChanged("Data start hint not found")
@@ -68,8 +73,9 @@ def lang_links(txt):
         balance += (txt[i] == '{') - (txt[i] == '}')
         if balance == 0:
             return txt[start - 1:i + 1]
-    
+
     raise HtmlFormatChanged("Unbalanced data section")
+
 
 def load_assets(article_id, langs, fmt=FORMAT):
     "Downloads article with given id for given languages"
@@ -82,7 +88,7 @@ def load_assets(article_id, langs, fmt=FORMAT):
     links = json.loads(lang_links(src.text))
     filename = ''
     if langs[0] in links:
-        filename = links[langs[0]]['docx'].split('_')[-1][:-5]
+        filename = links[langs[0]]['docx']['name'].split('_')[-1][:-5]
     for lang in langs:
         if lang not in links:
             if not os.path.exists(f'zohar_{lang}/{filename}.docx'):
@@ -90,9 +96,10 @@ def load_assets(article_id, langs, fmt=FORMAT):
             else:
                 yield Asset('', filename, lang, True)
         else:
-            filename = links[lang]['docx'].split('_')[-1][:-5]
-            url = ASSET_BASE_URL + article_id + '/' + links[lang][fmt]
+            filename = links[lang]['docx']['name'].split('_')[-1][:-5]
+            url = ASSET_BASE_URL + article_id + '/' + links[lang][fmt]['name']
             yield Asset(requests.get(url).content, filename, lang)
+
 
 def extract_id(asset_url):
     """Extracts document id from url.
@@ -103,8 +110,9 @@ def extract_id(asset_url):
     i = asset_url.find(BEFORE_ID)
     if i < 0:
         return NoArticleId(asset_url)
-    
+
     return asset_url[i + len(BEFORE_ID):].split('?')[0]
+
 
 def file_size(path):
     try:
@@ -112,7 +120,10 @@ def file_size(path):
     except FileNotFoundError:
         return -1
 
-def download(_id, dest='', langs=('he', 'en')):
+
+def download(_id, dest='', langs=None):
+    if langs is None:
+        langs = ['he']
     assets = list(load_assets(_id, langs=langs))
 
     assert assets, "documents number must be equal to LANGS length"
@@ -123,12 +134,12 @@ def download(_id, dest='', langs=('he', 'en')):
 
     paths = []
     filename = ''
-    
+
     for asset in assets:
         path = os.path.join(base, asset.lang) + '.' + FORMAT
         paths.append((asset.lang, path))
 
-        if asset.lang != 'he':# if asset.lang == 'en':
+        if asset.lang != 'he':  # if asset.lang == 'en':
             filename = asset.filename
 
         if not asset.local:
@@ -138,6 +149,7 @@ def download(_id, dest='', langs=('he', 'en')):
             shutil.copyfile(f'zohar_{asset.lang}/{filename}.docx', path)
 
     return paths, filename, base
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -149,6 +161,7 @@ def main():
     langs = (args.source, args.target)
     _id = extract_id(url)
     download(_id, langs)
+
 
 if __name__ == "__main__":
     main()

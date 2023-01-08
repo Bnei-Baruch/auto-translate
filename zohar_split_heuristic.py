@@ -2,33 +2,46 @@ import argparse
 import regexes
 import math
 import re
+from hebrew_numbers import gematria_to_int
 
 import sys
+
 
 def keep_digit(s):
     "keeps only digits in the input string and converts them to int"
 
-    return int(re.sub('[^0-9]', '', s))
+    s = re.sub('[^0-9\u0590-\u05FF]', '', s)
+    res = int(s) if s.isdigit() else gematria_to_int(s)
+    return res
+
 
 def split_by_letters(contents, lang):
     "splits the input string by letters (letter = Ot)"
 
     item = regexes.REGEXES[lang].ITEM
     parts = re.split(f'({item})', contents, flags=re.MULTILINE)
+    if len(parts) <= 1 and lang == 'he':
+        item = regexes.REGEXES[lang].ITEM_PAR
+        parts = re.split(f'({item})', contents, flags=re.MULTILINE)
+    if len(parts) <= 1 and len(contents.split()) <= 500:
+        parts = ['', '1)', contents]
     keys = [keep_digit(key) for key in parts[1::2]]
     values = parts[2::2]
     assert len(keys) == len(values)
     return zip(keys, values)
 
+
 def letters_chunks(tgt_doc, src_doc, langs):
     "returns list of triples containing letter number (Ot), english content and hebrew content"
-
-    source, target = langs
-    tgt = dict(split_by_letters(tgt_doc, target))
-    src = dict(split_by_letters(src_doc, source))
-
-    letters = list(sorted(set(tgt.keys()) | set(src.keys())))
-    res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
+    res = []
+    if len(tgt_doc.split()) <= 500 and len(src_doc.split()) <= 500:
+        res.append((1, tgt_doc, src_doc))
+    else:
+        source, target = langs
+        tgt = dict(split_by_letters(tgt_doc, target))
+        src = dict(split_by_letters(src_doc, source))
+        letters = list(sorted(set(tgt.keys()) | set(src.keys())))
+        res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
     return res
 
 
@@ -80,11 +93,8 @@ def split_letters_source(src_doc, max_words, source):
         if not src:
             continue
 
-        # src = re.sub(r'\d+', '', src)
-        # src_strip = re.sub(r'\n+', '\n', src).strip()
-        # src_sents = src_strip.split('\n')
         src_strip = re.sub(r'\n+', '.', src).strip()
-        src_sents = [s+'.' for s in src_strip.split('.') if s]
+        src_sents = [s + '.' for s in src_strip.split('.') if s]
 
         src_one = ''
         for src_current in src_sents:
@@ -97,8 +107,7 @@ def split_letters_source(src_doc, max_words, source):
                 if src_one:
                     append(letter_src, letter, src_one, source, True)
                 src_one = ''
-                # if ln_src < max_words:
-                assert ln_src < max_words, 'TOO LONG'
+                # assert ln_src < max_words, 'TOO LONG'
                 src_one += src_current.strip() + ' '
             words_processed += ln_src
 
@@ -110,6 +119,7 @@ def split_letters_source(src_doc, max_words, source):
 
     return output_src, words_processed, words_total
 
+
 def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
     """Runs split heuristics. The heuristic works as follows:
             If the number of english words is smaller than max_words, the content is left as is.
@@ -117,7 +127,7 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
             than max_words (it is larger because atomic parts of the text are not split)"""
     source, target = langs
     use_ratio = ratio != 0.
-    min_ratio = 1/ratio if use_ratio else 0.
+    min_ratio = 1 / ratio if use_ratio else 0.
     max_ratio = ratio if use_ratio else 0.
     if target == 'ru': tgt_doc = tgt_doc.replace('«', '“').replace('»', '”')
     if source == 'ru': src_doc = src_doc.replace('«', '“').replace('»', '”')
@@ -160,20 +170,20 @@ def split_letters_new(tgt_doc, src_doc, langs, max_words, atomic_line, ratio):
 
         if len(tgt_sents) != len(src_sents):
             tgt_no_linebreak = tgt_strip.replace('\n', ' ').strip()
-            tgt_sents = tgt_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
+            # tgt_sents = tgt_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
             src_no_linebreak = src_strip.replace('\n', ' ').strip()
-            src_sents = src_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
+            # src_sents = src_no_linebreak.replace('.’', '’.').replace('.”', '”.').replace('.’”', '’”.').split('. ')
 
-            if len(tgt_sents) != len(src_sents):
-                n_tgt = len(tgt_strip.split())
-                n_src = len(src_strip.split())
-                words_total += n_src
-                ratio = True if not use_ratio else min_ratio < (n_tgt / n_src) < max_ratio
-                if n_tgt < max_words and n_src < max_words and ratio:
-                    words_processed += n_src
-                    append(output_tgt, letter, tgt_no_linebreak, target, True)
-                    append(output_src, letter, src_no_linebreak, source, True)
-                continue
+            # if len(tgt_sents) != len(src_sents):
+            n_tgt = len(tgt_strip.split())
+            n_src = len(src_strip.split())
+            words_total += n_src
+            ratio = True if not use_ratio else min_ratio < (n_tgt / n_src) < max_ratio
+            if n_tgt < max_words and n_src < max_words and ratio:
+                words_processed += n_src
+                append(output_tgt, letter, tgt_no_linebreak, target, True)
+                append(output_src, letter, src_no_linebreak, source, True)
+            continue
 
         tgt_one, src_one = '', ''
         for tgt_current, src_current in zip(tgt_sents, src_sents):
@@ -215,7 +225,7 @@ def join_text(letters):
         letter = str(letter)
         content = content.strip()
         if letter and content:
-            s += letter+content+'\n'
+            s += letter + content + '\n'
     return s
 
 
@@ -224,7 +234,8 @@ def save_file(letters, path):
         for letter, content in letters:
             letter = str(letter)
             content = content.strip()
-            print(letter+content, file=f)
+            print(letter + content, file=f)
+
 
 def split_and_save(tgt_doc, src_doc, langs, words_threshold, atomic_line, tgt_out, src_out, split_ratio):
     "runs split heuristic and save the output to a file"
@@ -237,6 +248,7 @@ def split_and_save(tgt_doc, src_doc, langs, words_threshold, atomic_line, tgt_ou
     save_file(output_src, src_out)
 
     return letters_processed, letters_total
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -257,6 +269,7 @@ def main():
     tgt_output = args.target_file + args.output_postfix
     split_and_save(args.target_file, args.source_file, (args.source, args.target),
                    args.words_threshold, args.atomic_line, tgt_output, src_output, args.split_ratio)
+
 
 if __name__ == "__main__":
     main()

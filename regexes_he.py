@@ -1,6 +1,7 @@
 ## Item (letter) indicator
 ITEM = r'^\.[0-9]+'
 
+ITEM_PAR = r'^[\u0590-\u05FF]+\)'
 ## Chunk Regexes
 
 # The sentences are not split in the following points (it overrides _SPLIT items)

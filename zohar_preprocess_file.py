@@ -6,6 +6,7 @@ import argparse
 
 from regexes import REGEXES
 
+
 class Options:
     "file processing options for one file"
 
@@ -14,6 +15,7 @@ class Options:
         self.mode = mode
         self.lang = lang
         self.n = n
+
 
 class Document:
     "Docx content and meta info"
@@ -24,27 +26,34 @@ class Document:
         self._title = asset.title
         self.lang = asset.lang
         self.size = len(asset.content)
-    
+
     def title(self):
         formatted = self._title.split('|')[0].split('-')[0].strip().replace(' ', '-')
         return f'{formatted}-{self._id}'
+
 
 def parse_docx(content):
     "Converts docx bytes to a list of strings where each string represents a paragraph"
 
     with io.BytesIO(content) as fileobj:
-        doc = docx.Document(fileobj)
+        try:
+            doc = docx.Document(fileobj)
+        except:
+            return list()
         paragraphs = [p.text for p in doc.paragraphs]
         return paragraphs
 
+
 def keep_paragraph(p):
     return p[:1].isdigit() or len(p.split()) > 8
+
 
 def paragraphs(content):
     "Converts docx file to plain text where paragraphs are separated by a newline character"
 
     pars = parse_docx(content)
     return '\n'.join(p.replace('\n', ' ') for p in pars if keep_paragraph(p))
+
 
 def regex_keep(output, regexes):
     "gets a string and a list of regexes and returns a set of indexes covering all of matches"
@@ -58,6 +67,7 @@ def regex_keep(output, regexes):
 
     return keep
 
+
 def regex_split(output, regexes):
     "gets a string and a list of regexes and returns a set of the last indexes of every match"
 
@@ -70,13 +80,15 @@ def regex_split(output, regexes):
 
     return split
 
+
 def split_by_indexes(output, keep, split):
     """Splits a string by regexes, `keep` are a set of regexes of patterns where a split is impossible,
        `split` are regexes of patterns that precede every split"""
 
     indexes = [-1] + list(sorted(set(split) - set(keep))) + [len(output)]
     for i, j in zip(indexes, indexes[1:]):
-        yield output[i+1:j+1].strip()
+        yield output[i + 1:j + 1].strip()
+
 
 def split_sentences(output, lang):
     """Splits the string by sentences. The regexes defining the sentences are located in regex_{lang}.py files"""
@@ -85,6 +97,7 @@ def split_sentences(output, lang):
     split = regex_split(output, REGEXES[lang].SENTENCES_SPLIT)
 
     return '\n'.join(split_by_indexes(output, keep, split))
+
 
 def split_characters(output, lang, n_chars):
     """Splits the string by characters. Avoids splitting in the middle of a word or
@@ -109,6 +122,7 @@ def split_characters(output, lang, n_chars):
     if chunk:
         yield chunk.strip()
 
+
 def replace(output, lang):
     "Runs replacement regexes on a string"
 
@@ -118,6 +132,7 @@ def replace(output, lang):
         output = re.sub(pattern, repl, output, flags=re.MULTILINE)
 
     return output
+
 
 def process(options, postfix):
     "the main logic: splits the input into chunks, runs replacement regexes and saves the output"
@@ -138,6 +153,8 @@ def process(options, postfix):
 
         with open(opt.path + postfix, 'w', encoding='utf-8') as fout:
             fout.write(output)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", default='he', help="source language")
@@ -155,6 +172,7 @@ def main():
             Options(args.source_file, args.chunk, args.source, args.n_chars_src)]
 
     process(opts, args.postfix)
+
 
 if __name__ == "__main__":
     main()
