@@ -22,7 +22,7 @@ def model_setup():
               'he_sp_zohar_V1':
                   'https://drive.google.com/u/0/uc?id=1IVPls1YJyJFhrfArKSNkUrZJiQghpT9o&export=download',
               'he_en_zohar_V2':
-                  'https://drive.google.com/u/0/uc?id=1PHIi0vtHZ00_bzq4tjKhz2ET3AUTwMXK&export=download',
+                  'https://drive.google.com/u/0/uc?id=1ztkSltdH6j3yfTTModxH8aSkUA_lJlJW&export=download',
               }
     for model_name, model_url in models.items():
         is_old = model_name.endswith('V1')
@@ -31,8 +31,8 @@ def model_setup():
             gdown.download(model_url, output, quiet=False)
             with ZipFile(output, 'r') as zipf:
                 zipf.extractall()
-            path = 'content'
-            if is_old: path += '/model'
+            path = 'ds_combined_ft_optimized'
+            if is_old: path = 'content/model'
             shutil.move(path, f'models/{model_name}')
             if is_old: shutil.rmtree('content')
 
