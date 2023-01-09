@@ -19,9 +19,9 @@ class Args:
 
 
 def timed_test(mname):
-    with open('dad.docx', 'rb') as f:
+    with open('multiline.txt', 'r', encoding='utf8') as f:
         content = f.read()
-    content = '.253 אין דבר שיהיה אהוב לפני הקב"ה, כמו תפילתם של צדיקים. ואע"פ שרצוי לו, פעם עושה בקשתם ופעם אינו עושה.'
+    # content = '.253 אין דבר שיהיה אהוב לפני הקב"ה, כמו תפילתם של צדיקים. ואע"פ שרצוי לו, פעם עושה בקשתם ופעם אינו עושה.'
     for bs in [24]:
         print(bs)
         start = time()

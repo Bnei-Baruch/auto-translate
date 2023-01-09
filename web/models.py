@@ -114,11 +114,11 @@ class TranslationModel:
         res = {'target': 'Translation 1', 'source': 'Not a text file'}
         if mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
             content = process(content)
-        max_words = 400 if self.model.endswith('V2') else 200
-        split_txt = split_content(content, max_words=max_words, source=self.source)
-        txt = join_text(split_txt)
-        translated_txt = self.translate(txt)
-        txt = '\n\n'.join(txt.split('\n'))
+            max_words = 400 if self.model.endswith('V2') else 200
+            split_txt = split_content(content, max_words=max_words, source=self.source)
+            content = join_text(split_txt)
+        translated_txt = self.translate(content)
+        txt = '\n\n'.join(content.split('\n'))
         translated_txt = '\n\n'.join(translated_txt.split('\n'))
         res['target'] = translated_txt.strip()
         res['source'] = txt.strip()
