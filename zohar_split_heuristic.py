@@ -228,7 +228,8 @@ def join_text(letters):
         letter = str(letter)
         content = content.strip()
         if letter and content:
-            s += letter + content + '\n'
+            s = letter if letter != '.-1 ' else '.'
+            s += content + '\n'
     return s
 
 

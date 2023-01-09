@@ -21,16 +21,18 @@ class Args:
 def timed_test(mname):
     with open('dad.docx', 'rb') as f:
         content = f.read()
+    content = '.253 אין דבר שיהיה אהוב לפני הקב"ה, כמו תפילתם של צדיקים. ואע"פ שרצוי לו, פעם עושה בקשתם ופעם אינו עושה.'
     for bs in [24]:
         print(bs)
         start = time()
         args = Args({'bs': bs, 'backend': 'huggingface', 'threads': -1})
         model = TranslationModel(mname, None, args, False, '../web/models/')
         translate_start = time()
-        res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
+        # res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
+        res = model('text', content)
         print(res)
-        with open('results.txt', 'w') as f:
-            f.write(res['target'])
+        # with open('results.txt', 'w') as f:
+        #     f.write(res['target'])
         end = time()
         print('Total time: ', end - start)
         print('Translation time: ', end - translate_start)
