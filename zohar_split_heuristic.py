@@ -9,9 +9,10 @@ import sys
 
 def keep_digit(s):
     "keeps only digits in the input string and converts them to int"
-
-    s = re.sub('[^0-9\u0590-\u05FF]', '', s)
-    res = int(s) if s.isdigit() else gematria_to_int(s)
+    res = s
+    if s:
+        s = re.sub('[^0-9\u0590-\u05FF]', '', s)
+        res = int(s) if s.isdigit() else gematria_to_int(s)
     return res
 
 
@@ -24,7 +25,7 @@ def split_by_letters(contents, lang):
         item = regexes.REGEXES[lang].ITEM_PAR
         parts = re.split(f'({item})', contents, flags=re.MULTILINE)
     if len(parts) <= 1 and len(contents.split()) <= 500:
-        parts = ['', '1)', contents]
+        parts = ['', '', contents]
     keys = [keep_digit(key) for key in parts[1::2]]
     values = parts[2::2]
     assert len(keys) == len(values)
@@ -34,13 +35,15 @@ def split_by_letters(contents, lang):
 def letters_chunks(tgt_doc, src_doc, langs):
     "returns list of triples containing letter number (Ot), english content and hebrew content"
     res = []
+    if not tgt_doc or not src_doc:
+        return res
     if len(tgt_doc.split()) <= 500 and len(src_doc.split()) <= 500:
-        res.append((1, tgt_doc, src_doc))
+        res.append((-1, tgt_doc, src_doc))
     else:
         source, target = langs
         tgt = dict(split_by_letters(tgt_doc, target))
         src = dict(split_by_letters(src_doc, source))
-        letters = list(sorted(set(tgt.keys()) | set(src.keys())))
+        letters = [i for i in src.keys() if i in set(tgt.keys())]
         res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
     return res
 
@@ -234,7 +237,8 @@ def save_file(letters, path):
         for letter, content in letters:
             letter = str(letter)
             content = content.strip()
-            print(letter + content, file=f)
+            s = letter if letter != '-1' else ''
+            print(s + content, file=f)
 
 
 def split_and_save(tgt_doc, src_doc, langs, words_threshold, atomic_line, tgt_out, src_out, split_ratio):

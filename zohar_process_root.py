@@ -23,7 +23,8 @@ SAMPLES_DEST = {'ALlyoveA': 'bs_hakdamot',
                 'hFeGidcS': 'bs_shamati',
                 'PBrkeif3': 'rabash_igrot',
                 'M53FJnYF': 'rabash_maamarim',
-                'jYQX6fmA': 'rabash_reshumot'}
+                'jYQX6fmA': 'rabash_reshumot',
+                }
 
 
 def sources_list(base=SAMPLE_URL):
@@ -89,69 +90,69 @@ def main():
     parser.add_argument("--max_ratio", help="maximum target/source ratio", default=2.5)
 
     parser.add_argument("--summary_name", help="html summary file name", default="summary.html")
-    # for root, dest in SAMPLES_DEST.items():
-    #     dest = 'kab_corpus'
-    parser.set_defaults(skip=False)
-    parser.set_defaults(strict=True)
-    parser.set_defaults(combine_letters=False)
-    # parser.set_defaults(root='https://kabbalahmedia.info/he/sources/'+root, dest=dest)
-    total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
-    args = parser.parse_args()
-    sources = sources_list(args.root)
-    langs = (args.source, args.target)
-    block = 'en' in langs
-    block_list = ['F2LYqFgK', 'lgUtBujx']
-    dest_folder = f'{args.dest}_{args.source}_{args.target}'
-    shutil.rmtree(dest_folder, ignore_errors=True)
-    if block:
-        sources = [s for s in sources if s not in block_list]
-    all_res = p_map(download_function, [(s, args) for s in sources])
-    all_res = [a for a in all_res if a is not None]
-    for paths, filename, base, src in all_res:
-        if args.skip:
-            continue
-        lang_paths = dict(paths)
-        tgt_path = lang_paths[args.target]
-        src_path = lang_paths[args.source]
+    for root, dest in SAMPLES_DEST.items():
+        dest = 'kab_corpus'
+        parser.set_defaults(skip=False)
+        parser.set_defaults(strict=True)
+        parser.set_defaults(combine_letters=False)
+        parser.set_defaults(root='https://kabbalahmedia.info/he/sources/'+root, dest=dest)
+        total_discarded, total_kept, total_letters_processed, total_letters = 0, 0, 0, 0
+        args = parser.parse_args()
+        sources = sources_list(args.root)
+        langs = (args.source, args.target)
+        block = 'en' in langs
+        block_list = ['F2LYqFgK', 'lgUtBujx']
+        dest_folder = f'{args.dest}_{args.source}_{args.target}'
+        ## shutil.rmtree(dest_folder, ignore_errors=True)
+        if block:
+            sources = [s for s in sources if s not in block_list]
+        all_res = p_map(download_function, [(s, args) for s in sources])
+        all_res = [a for a in all_res if a is not None]
+        for paths, filename, base, src in all_res:
+            if args.skip:
+                continue
+            lang_paths = dict(paths)
+            tgt_path = lang_paths[args.target]
+            src_path = lang_paths[args.source]
 
-        ts = utctime()
-        postfix = '.' + ts + '.txt'
-        opts = [Options(tgt_path, args.chunk, args.target, args.n_chars_tgt),
-                Options(src_path, args.chunk, args.source, args.n_chars_src)]
-        process(opts, postfix)
+            ts = utctime()
+            postfix = '.' + ts + '.txt'
+            opts = [Options(tgt_path, args.chunk, args.target, args.n_chars_tgt),
+                    Options(src_path, args.chunk, args.source, args.n_chars_src)]
+            process(opts, postfix)
 
-        tgt_split = tgt_path + '.' + src + args.split_extension
-        src_split = src_path + '.' + src + args.split_extension
-        tgt_path += postfix
-        src_path += postfix
+            tgt_split = tgt_path + '.' + src + args.split_extension
+            src_split = src_path + '.' + src + args.split_extension
+            tgt_path += postfix
+            src_path += postfix
 
-        sep = '\n'
-        if args.words_threshold:
-            atomic_line = args.chunk != 'joined'
-            letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
-                                                          args.words_threshold, atomic_line,
-                                                          tgt_split, src_split, args.split_ratio)
-            total_letters_processed += letters_processed
-            total_letters += n_letters
-
-            tgt_path = tgt_split
-            src_path = src_split
             sep = '\n'
+            if args.words_threshold:
+                atomic_line = args.chunk != 'joined'
+                letters_processed, n_letters = split_and_save(tgt_path, src_path, langs,
+                                                              args.words_threshold, atomic_line,
+                                                              tgt_split, src_split, args.split_ratio)
+                total_letters_processed += letters_processed
+                total_letters += n_letters
 
+                tgt_path = tgt_split
+                src_path = src_split
+                sep = '\n'
+
+            if args.strict:
+                discarded, kept = combine_discard_non_matching(tgt_path, src_path, langs, sep,
+                                                               args.words_threshold, args.combine_letters)
+                total_discarded += discarded
+                total_kept += kept
+
+            summary = os.path.join(base, args.summary_name)
+            with open(summary, 'w', encoding='utf-8') as f:
+                save_summary(tgt_path, src_path, langs,
+                             sep, args.min_ratio, args.max_ratio, filename, ts, f)
         if args.strict:
-            discarded, kept = combine_discard_non_matching(tgt_path, src_path, langs, sep,
-                                                           args.words_threshold, args.combine_letters)
-            total_discarded += discarded
-            total_kept += kept
-
-        summary = os.path.join(base, args.summary_name)
-        with open(summary, 'w', encoding='utf-8') as f:
-            save_summary(tgt_path, src_path, langs,
-                         sep, args.min_ratio, args.max_ratio, filename, ts, f)
-    if args.strict:
-        print('# Words processed, total words:',
-              total_letters_processed, total_letters, total_letters_processed / total_letters)
-        print('Total chunks kept, discarded during validation:', total_kept, total_discarded)
+            print('# Words processed, total words:',
+                  total_letters_processed, total_letters, total_letters_processed / total_letters)
+            print('Total chunks kept, discarded during validation:', total_kept, total_discarded)
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ class Args:
 
 
 def timed_test(mname):
-    with open('benchmark.docx', 'rb') as f:
+    with open('dad.docx', 'rb') as f:
         content = f.read()
     for bs in [24]:
         print(bs)
@@ -29,6 +29,8 @@ def timed_test(mname):
         translate_start = time()
         res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
         print(res)
+        with open('results.txt', 'w') as f:
+            f.write(res['target'])
         end = time()
         print('Total time: ', end - start)
         print('Translation time: ', end - translate_start)
