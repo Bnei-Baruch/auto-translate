@@ -32,6 +32,20 @@ def split_by_letters(contents, lang):
     return zip(keys, values)
 
 
+def fix_letters(tgt_let, src_let):
+    letters = []
+    for t, s in zip(tgt_let, src_let):
+        if t and not s:
+            letters.append(t)
+        elif s and not t:
+            letters.append(s)
+        elif not s and not t:
+            letters.append('')
+        else:
+            letters.append(s)
+    return letters
+
+
 def letters_chunks(tgt_doc, src_doc, langs):
     "returns list of triples containing letter number (Ot), english content and hebrew content"
     res = []
@@ -41,10 +55,20 @@ def letters_chunks(tgt_doc, src_doc, langs):
         res.append((-1, tgt_doc, src_doc))
     else:
         source, target = langs
-        tgt = dict(split_by_letters(tgt_doc, target))
-        src = dict(split_by_letters(src_doc, source))
-        letters = [i for i in src.keys() if i in set(tgt.keys())]
-        res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
+        tgt_split = split_by_letters(tgt_doc, target)
+        src_split = split_by_letters(src_doc, source)
+        tgt = list(tgt_split)
+        src = list(src_split)
+        if len(tgt) == len(src):
+            tgt_let = [t[0] for t in tgt]
+            src_let = [s[0] for s in src]
+            letters = fix_letters(tgt_let, src_let)
+            res = [(letter, tgt[i][1], src[i][1]) for i, letter in enumerate(letters)]
+        else:
+            tgt = dict(split_by_letters(tgt_doc, target))
+            src = dict(split_by_letters(src_doc, source))
+            letters = [i for i in src.keys() if i in set(tgt.keys())]
+            res = [(letter, tgt.get(letter), src.get(letter)) for letter in letters]
     return res
 
 
@@ -228,7 +252,7 @@ def join_text(letters):
         letter = str(letter)
         content = content.strip()
         if letter and content:
-            curr_s = letter if letter != '.-1 ' else '.'
+            curr_s = letter if not '-1' in letter else '.'
             s += curr_s + content + '\n'
     return s
 

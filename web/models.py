@@ -22,19 +22,17 @@ def model_setup():
               'he_sp_zohar_V1':
                   'https://drive.google.com/u/0/uc?id=1IVPls1YJyJFhrfArKSNkUrZJiQghpT9o&export=download',
               'he_en_zohar_V2':
-                  'https://drive.google.com/u/0/uc?id=1ztkSltdH6j3yfTTModxH8aSkUA_lJlJW&export=download',
+                  'https://drive.google.com/u/0/uc?id=1naBttcQMLFRwywayjH7nCeR2bxxSFZsJ&export=download',
               }
     for model_name, model_url in models.items():
-        is_old = model_name.endswith('V1')
         if not os.path.exists(f'models/{model_name}'):
             output = 'model.zip'
             gdown.download(model_url, output, quiet=False)
             with ZipFile(output, 'r') as zipf:
                 zipf.extractall()
-            path = 'ds_combined_ft_optimized'
-            if is_old: path = 'content/model'
+            path = 'content/model'
             shutil.move(path, f'models/{model_name}')
-            if is_old: shutil.rmtree('content')
+            shutil.rmtree('content')
 
 
 def process(content, lang='he'):
