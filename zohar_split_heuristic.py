@@ -228,8 +228,8 @@ def join_text(letters):
         letter = str(letter)
         content = content.strip()
         if letter and content:
-            s = letter if letter != '.-1 ' else '.'
-            s += content + '\n'
+            curr_s = letter if letter != '.-1 ' else '.'
+            s += curr_s + content + '\n'
     return s
 
 
@@ -238,7 +238,7 @@ def save_file(letters, path):
         for letter, content in letters:
             letter = str(letter)
             content = content.strip()
-            s = letter if letter != '-1' else ''
+            s = '' if '-1' in letter else letter
             print(s + content, file=f)
 
 

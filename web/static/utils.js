@@ -156,7 +156,7 @@ function modelSelectChanged() {
         .map(el => el.version)
         .filter((v, i, a) => a.indexOf(v) === i)
         .map((element, i) => {
-            var selected = selectVersion == element ? 'selected' : '';
+            var selected = selectedVersion == element ? 'selected' : '';
             return `<option value="${element}" ${selected}>${element}</option>`;
         }).join("");
 

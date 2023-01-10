@@ -48,7 +48,8 @@ def split_content(content, max_words, source):
     output, words_processed, words_total = res
     if words_total == 0:
         raise Exception('No words found, bad format or wrong language maybe?')
-    print(f'Processed {words_processed} words out of {words_total} ({100 * words_processed / words_total}%)')
+    print(f'Processed {words_processed} words out of {words_total} ({100 * words_processed / words_total}%) with '
+          f'max_words {max_words}')
     return output
 
 
@@ -71,7 +72,7 @@ class TranslationModel:
         mname = rel_path + model
         self.torch_device = 'cpu'
         self.trained_model = AutoModelForSeq2SeqLM.from_pretrained(mname).to(self.torch_device)
-        self.trained_tok = AutoTokenizer.from_pretrained(mname)
+        self.trained_tok = AutoTokenizer.from_pretrained(mname, is_fast=True)
 
     def get_translated_text(self, text):
         text = [t for t in text if t]
@@ -113,10 +114,16 @@ class TranslationModel:
     def __call__(self, mimetype, content):
         res = {'target': 'Translation 1', 'source': 'Not a text file'}
         if mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            content = process(content)
-            max_words = 400 if self.model.endswith('V2') else 200
-            split_txt = split_content(content, max_words=max_words, source=self.source)
+            original_content = process(content)
+            max_words = 350 if self.model.endswith('V2') else 200
+            split_txt = split_content(original_content, max_words=max_words, source=self.source)
             content = join_text(split_txt)
+            tok_ln = self.trained_tok(content.split('\n'), return_length=True)['length']
+            while max(tok_ln) >= 512:
+                max_words -= 50
+                split_txt = split_content(original_content, max_words=max_words, source=self.source)
+                content = join_text(split_txt)
+                tok_ln = self.trained_tok(content.split('\n'), return_length=True)['length']
         translated_txt = self.translate(content)
         txt = '\n\n'.join(content.split('\n'))
         translated_txt = '\n\n'.join(translated_txt.split('\n'))

@@ -19,17 +19,15 @@ class Args:
 
 
 def timed_test(mname):
-    with open('multiline.txt', 'r', encoding='utf8') as f:
+    with open('benchmark.docx', 'rb') as f:
         content = f.read()
-    # content = '.253 אין דבר שיהיה אהוב לפני הקב"ה, כמו תפילתם של צדיקים. ואע"פ שרצוי לו, פעם עושה בקשתם ופעם אינו עושה.'
     for bs in [24]:
         print(bs)
         start = time()
         args = Args({'bs': bs, 'backend': 'huggingface', 'threads': -1})
         model = TranslationModel(mname, None, args, False, '../web/models/')
         translate_start = time()
-        # res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
-        res = model('text', content)
+        res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
         print(res)
         # with open('results.txt', 'w') as f:
         #     f.write(res['target'])
@@ -38,5 +36,14 @@ def timed_test(mname):
         print('Translation time: ', end - translate_start)
 
 
+def upload_docx(mname='he_en_zohar_V2'):
+    with open('heb_o_zohar-la-am-zh-vaetchanan.docx', 'rb') as f:
+        content = f.read()
+    args = Args({'bs': 24, 'backend': 'huggingface', 'threads': -1})
+    model = TranslationModel(mname, None, args, False, '../web/models/')
+    res = model('application/vnd.openxmlformats-officedocument.wordprocessingml.document', content)
+    print(res)
+
+
 if __name__ == '__main__':
-    timed_test('he_en_zohar_V2')
+    upload_docx()
