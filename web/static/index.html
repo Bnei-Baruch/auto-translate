@@ -232,6 +232,7 @@
 
         copy.addEventListener('click', (event) => {
             const text = document.getElementById('edited');
+            navigator.clipboard.writeText(text.value);
             copyText(text.innerHTML);
         });
 
